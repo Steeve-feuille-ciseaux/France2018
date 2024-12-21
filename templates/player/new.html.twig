@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un nouveau joueur{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="h3 mb-0">Ajouter un nouveau joueur</h1>
+        </div>
+        
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.firstName) }}
+                            {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.firstName) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.lastName) }}
+                            {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.lastName) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.birthDate) }}
+                            {{ form_widget(form.birthDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.birthDate) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.nationality) }}
+                            {{ form_widget(form.nationality, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nationality) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.position) }}
+                            {{ form_widget(form.position, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.position) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.jerseyNumber) }}
+                            {{ form_widget(form.jerseyNumber, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.jerseyNumber) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.currentClub) }}
+                    {{ form_widget(form.currentClub, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.currentClub) }}
+                </div>
+
+                <div class="trophies-section">
+                    <h3 class="h4 mb-3">Palmarès</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.worldCups) }}
+                                {{ form_widget(form.worldCups, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.worldCups) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.championsLeague) }}
+                                {{ form_widget(form.championsLeague, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.championsLeague) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.europeLeague) }}
+                                {{ form_widget(form.europeLeague, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.europeLeague) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.nationalChampionship) }}
+                                {{ form_widget(form.nationalChampionship, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nationalChampionship) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.nationalCup) }}
+                                {{ form_widget(form.nationalCup, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nationalCup) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.photo) }}
+                    {{ form_widget(form.photo, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.photo) }}
+                    <small class="form-text text-muted">
+                        Formats acceptés : JPG, PNG. Taille maximale : 1MB
+                    </small>
+                </div>
+
+                <div class="form-actions mt-4">
+                    <a href="{{ path('app_player_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .trophies-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+        }
+    </style>
+{% endblock %}

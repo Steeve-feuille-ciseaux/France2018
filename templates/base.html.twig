@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}FootballZone{% endblock %}</title>
+        <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}
+            {{ importmap('app') }}
+        {% endblock %}
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="logo">
+                    <h1>⚽ FootballZone</h1>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="{{ path('app_player_index') }}">Joueurs</a></li>
+                    <li><a href="{{ path('app_player_new') }}">Ajouter un joueur</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="container" style="margin-top: 5rem;">
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FootballZone</h3>
+                    <p>Votre passion du football au quotidien</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liens Rapides</h3>
+                    <ul>
+                        <li><a href="{{ path('app_player_index') }}">Liste des joueurs</a></li>
+                        <li><a href="{{ path('app_player_new') }}">Ajouter un joueur</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Suivez-nous</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FootballZone. Tous droits réservés.</p>
+            </div>
+        </footer>
+    </body>
+</html>

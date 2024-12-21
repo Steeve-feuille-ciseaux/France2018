@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ player.firstName }} {{ player.lastName }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    {% if player.photoFilename %}
+                        <img src="{{ asset('uploads/player/' ~ player.photoFilename) }}" 
+                             class="card-img-top" 
+                             alt="{{ player.firstName }} {{ player.lastName }}"
+                             style="height: 400px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                             style="height: 400px;">
+                            <i class="fas fa-user fa-6x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h2 mb-0">{{ player.firstName }} {{ player.lastName }}</h1>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Date de naissance:</strong><br>
+                                {{ player.birthDate|date('d/m/Y') }}</p>
+                                
+                                <p><strong>Nationalité:</strong><br>
+                                {{ player.nationality }}</p>
+                                
+                                <p><strong>Position:</strong><br>
+                                {{ player.position }}</p>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <p><strong>Club actuel:</strong><br>
+                                {{ player.currentClub }}</p>
+                                
+                                <p><strong>Numéro:</strong><br>
+                                {{ player.jerseyNumber }}</p>
+                            </div>
+                        </div>
+
+                        <div class="trophies-section mt-4">
+                            <h3 class="h4 mb-3">Palmarès</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {% if player.worldCups > 0 %}
+                                        <div class="trophy-item">
+                                            <i class="fas fa-trophy text-warning"></i>
+                                            <strong>Coupes du Monde:</strong> {{ player.worldCups }}
+                                        </div>
+                                    {% endif %}
+                                    {% if player.championsLeague > 0 %}
+                                        <div class="trophy-item">
+                                            <i class="fas fa-star text-primary"></i>
+                                            <strong>Ligues des Champions:</strong> {{ player.championsLeague }}
+                                        </div>
+                                    {% endif %}
+                                    {% if player.europeLeague > 0 %}
+                                        <div class="trophy-item">
+                                            <i class="fas fa-award text-orange"></i>
+                                            <strong>Ligues Europa:</strong> {{ player.europeLeague }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if player.nationalChampionship > 0 %}
+                                        <div class="trophy-item">
+                                            <i class="fas fa-medal text-success"></i>
+                                            <strong>Championnats Nationaux:</strong> {{ player.nationalChampionship }}
+                                        </div>
+                                    {% endif %}
+                                    {% if player.nationalCup > 0 %}
+                                        <div class="trophy-item">
+                                            <i class="fas fa-gem text-brown"></i>
+                                            <strong>Coupes Nationales:</strong> {{ player.nationalCup }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if player.worldCups == 0 and player.championsLeague == 0 and player.europeLeague == 0 and player.nationalChampionship == 0 and player.nationalCup == 0 %}
+                                <p class="text-muted text-center">Aucun trophée majeur</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <div class="btn-group">
+                                <a href="{{ path('app_player_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Retour
+                                </a>
+                                <a href="{{ path('app_player_edit', {'id': player.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                            </div>
+                            
+                            <form method="post" action="{{ path('app_player_delete', {'id': player.id}) }}" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ player.id) }}">
+                                <button class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .trophy-item {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .trophy-item i {
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+        .text-orange {
+            color: #FF8C00;
+        }
+        .text-brown {
+            color: #8B4513;
+        }
+        .trophies-section {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+{% endblock %}
