@@ -91,7 +91,7 @@
                             {% endif %}
                         </div>
 
-                        <div class="mt-4 d-flex justify-content-between">
+                        <div class="mt-4">
                             <div class="btn-group">
                                 <a href="{{ path('app_player_index') }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Retour
@@ -100,14 +100,6 @@
                                     <i class="fas fa-edit"></i> Modifier
                                 </a>
                             </div>
-                            
-                            <form method="post" action="{{ path('app_player_delete', {'id': player.id}) }}" 
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ player.id) }}">
-                                <button class="btn btn-danger">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </button>
-                            </form>
                         </div>
                     </div>
                 </div>
