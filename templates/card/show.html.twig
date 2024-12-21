@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Carte de {{ card.player.firstName }} {{ card.player.lastName }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h1 class="h3 mb-0">Détails de la carte</h1>
+                        <div class="btn-group">
+                            <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-light">
+                                <i class="fas fa-edit me-2"></i>Modifier
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        {% if card.imageFilename %}
+                            <div class="text-center mb-4">
+                                <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" 
+                                     class="img-fluid card-detail-image" 
+                                     alt="Carte de {{ card.player.firstName }} {{ card.player.lastName }}">
+                            </div>
+                        {% endif %}
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Joueur</h5>
+                                <p>
+                                    <a href="{{ path('app_player_show', {'id': card.player.id}) }}" class="text-decoration-none">
+                                        {{ card.player.firstName }} {{ card.player.lastName }}
+                                    </a>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Club</h5>
+                                <p>{{ card.club }}</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Numéro</h5>
+                                <p>{{ card.number }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Position</h5>
+                                <p>{{ card.position }}</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Saison de début</h5>
+                                <p>{{ card.startSeason }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Saison de fin</h5>
+                                <p>{{ card.endSeason ? card.endSeason : 'Non spécifiée' }}</p>
+                            </div>
+                        </div>
+
+                        {% if card.summary %}
+                            <div class="mb-4">
+                                <h5 class="text-primary">Résumé</h5>
+                                <p class="card-text">{{ card.summary }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if card.notableAction %}
+                            <div class="mb-4">
+                                <h5 class="text-primary">Action notable</h5>
+                                <p class="card-text">{{ card.notableAction }}</p>
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <div class="btn-group w-100">
+                                <a href="{{ path('app_player_show', {'id': card.player.id}) }}" class="btn btn-secondary">
+                                    <i class="fas fa-user me-2"></i>Voir le joueur
+                                </a>
+                                <a href="{{ path('app_card_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-list me-2"></i>Liste des cartes
+                                </a>
+                                <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>Modifier
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            border: none;
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #1a237e !important;
+        }
+        .card-detail-image {
+            max-height: 500px;
+            width: auto;
+            object-fit: contain;
+        }
+        .text-primary {
+            color: #1a237e !important;
+        }
+        .btn-primary {
+            background-color: #1a237e;
+            border-color: #1a237e;
+        }
+        .btn-primary:hover {
+            background-color: #0d47a1;
+            border-color: #0d47a1;
+        }
+        .btn-group {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-text {
+            white-space: pre-line;
+        }
+    </style>
+{% endblock %}

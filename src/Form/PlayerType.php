@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -107,6 +108,14 @@ class PlayerType extends AbstractType
                     ])
                 ],
                 'attr' => ['class' => 'form-control']
+            ])
+            ->add('summary', TextareaType::class, [
+                'label' => 'Résumé',
+                'required' => false,
+                'attr' => [
+                    'rows' => 5,
+                    'placeholder' => 'Résumé du joueur...'
+                ]
             ])
         ;
     }

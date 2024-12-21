@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des cartes{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="mb-4">Liste des cartes</h1>
+
+        <div class="row">
+            {% for card in cards %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-hover">
+                        {% if card.imageFilename %}
+                            <a href="{{ path('app_card_show', {'id': card.id}) }}" class="card-link">
+                                <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" 
+                                     class="card-img-top" 
+                                     alt="Carte de {{ card.player.firstName }} {{ card.player.lastName }}">
+                            </a>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ card.player.firstName }} {{ card.player.lastName }}</h5>
+                            <p class="card-text">
+                                <strong>Club:</strong> {{ card.club }}<br>
+                                <strong>Saison:</strong> {{ card.startSeason }}{% if card.endSeason %} - {{ card.endSeason }}{% endif %}
+                            </p>
+                            <div class="text-center">
+                                <div class="btn-group">
+                                    <a href="{{ path('app_card_show', {'id': card.id}) }}" class="btn btn-primary">
+                                        <i class="fas fa-eye me-1"></i>Voir
+                                    </a>
+                                    <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-secondary">
+                                        <i class="fas fa-edit me-1"></i>Modifier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Aucune carte n'a été créée pour le moment.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .shadow-hover:hover {
+            transform: translateY(-5px);
+        }
+        .card-img-top {
+            height: 300px;
+            object-fit: cover;
+        }
+        .card-link {
+            text-decoration: none;
+        }
+        .card-link:hover {
+            text-decoration: none;
+        }
+        .btn-primary {
+            background-color: #1a237e;
+            border-color: #1a237e;
+        }
+        .btn-primary:hover {
+            background-color: #0d47a1;
+            border-color: #0d47a1;
+        }
+        .btn-group {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+{% endblock %}

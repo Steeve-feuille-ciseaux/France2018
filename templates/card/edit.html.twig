@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la carte de {{ card.player.firstName }} {{ card.player.lastName }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1 class="mb-4">Modifier la carte de {{ card.player.firstName }} {{ card.player.lastName }}</h1>
+
+                {{ form_start(form, {'attr': {'id': 'card-form'}}) }}
+                {{ form_errors(form) }}
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Informations de la carte</h5>
+                    </div>
+                    <div class="card-body">
+                        {# Sélection du joueur #}
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">Joueur associé</h6>
+                            {{ form_row(form.player, {
+                                'attr': {
+                                    'class': 'form-select'
+                                }
+                            }) }}
+                        </div>
+
+                        {# Club #}
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">Club</h6>
+                            {{ form_row(form.club, {
+                                'attr': {
+                                    'class': 'form-control'
+                                }
+                            }) }}
+                        </div>
+
+                        {# Informations principales #}
+                        <div class="row mb-4">
+                            <h6 class="text-primary mb-3">Informations principales</h6>
+                            <div class="col-md-6">
+                                {{ form_row(form.number) }}
+                                {{ form_row(form.position) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_row(form.startSeason) }}
+                                {{ form_row(form.endSeason) }}
+                            </div>
+                        </div>
+
+                        {# Image actuelle et nouvelle image #}
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">Image de la carte</h6>
+                            {% if card.imageFilename %}
+                                <div class="mb-3">
+                                    <p><strong>Image actuelle :</strong></p>
+                                    <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" 
+                                         class="img-thumbnail" 
+                                         alt="Image actuelle"
+                                         style="max-height: 200px;">
+                                </div>
+                            {% endif %}
+                            <div class="custom-file">
+                                {{ form_widget(form.image, {
+                                    'attr': {
+                                        'class': 'form-control'
+                                    }
+                                }) }}
+                                {{ form_help(form.image) }}
+                                {{ form_errors(form.image) }}
+                            </div>
+                        </div>
+
+                        {# Descriptions #}
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">Descriptions</h6>
+                            {{ form_row(form.summary) }}
+                            {{ form_row(form.notableAction) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{{ path('app_card_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </a>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-save me-2"></i>Enregistrer
+                        </button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i>Supprimer
+                        </button>
+                    </div>
+                </div>
+
+                {{ form_rest(form) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    {# Modal de confirmation de suppression #}
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" action="{{ path('app_card_delete', {'id': card.id}) }}" style="display: inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ card.id) }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Confirmer la suppression
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            background-color: #1a237e;
+            color: white;
+        }
+        .text-primary {
+            color: #1a237e !important;
+        }
+        .btn-primary {
+            background-color: #1a237e;
+            border-color: #1a237e;
+        }
+        .btn-primary:hover {
+            background-color: #0d47a1;
+            border-color: #0d47a1;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1a237e;
+            box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.25);
+        }
+        .modal-content {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
+{% endblock %}
