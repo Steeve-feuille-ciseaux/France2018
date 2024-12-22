@@ -16,6 +16,16 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[Route('/pays')]
 class PaysController extends AbstractController
 {
+    private string $uploadDir;
+
+    public function __construct(string $projectDir)
+    {
+        $this->uploadDir = $projectDir . '/public/uploads/drapeaux';
+        if (!file_exists($this->uploadDir)) {
+            mkdir($this->uploadDir, 0777, true);
+        }
+    }
+
     #[Route('/', name: 'app_pays_index', methods: ['GET'])]
     public function index(PaysRepository $paysRepository): Response
     {
@@ -31,13 +41,6 @@ class PaysController extends AbstractController
         $form = $this->createForm(PaysType::class, $pays);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && !$form->isValid()) {
-            return $this->render('pays/check.html.twig', [
-                'pays' => $pays,
-                'form' => $form,
-            ]);
-        }
-
         if ($form->isSubmitted() && $form->isValid()) {
             $drapeauFile = $form->get('drapeau')->getData();
             if ($drapeauFile) {
@@ -46,21 +49,18 @@ class PaysController extends AbstractController
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$drapeauFile->guessExtension();
 
                 try {
-                    $drapeauFile->move(
-                        $this->getParameter('drapeaux_directory'),
-                        $newFilename
-                    );
+                    $drapeauFile->move($this->uploadDir, $newFilename);
+                    $pays->setDrapeau($newFilename);
                 } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
+                    $this->addFlash('error', 'Erreur lors de l\'upload du drapeau');
+                    return $this->redirectToRoute('app_pays_new');
                 }
-
-                $pays->setDrapeau($newFilename);
             }
 
             $entityManager->persist($pays);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_pays_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_pays_index');
         }
 
         return $this->render('pays/new.html.twig', [
@@ -83,13 +83,6 @@ class PaysController extends AbstractController
         $form = $this->createForm(PaysType::class, $pays);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && !$form->isValid()) {
-            return $this->render('pays/check.html.twig', [
-                'pays' => $pays,
-                'form' => $form,
-            ]);
-        }
-
         if ($form->isSubmitted() && $form->isValid()) {
             $drapeauFile = $form->get('drapeau')->getData();
             if ($drapeauFile) {
@@ -98,20 +91,24 @@ class PaysController extends AbstractController
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$drapeauFile->guessExtension();
 
                 try {
-                    $drapeauFile->move(
-                        $this->getParameter('drapeaux_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
-                }
+                    // Supprimer l'ancien drapeau si il existe
+                    if ($pays->getDrapeau()) {
+                        $oldFile = $this->uploadDir . '/' . $pays->getDrapeau();
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
+                        }
+                    }
 
-                $pays->setDrapeau($newFilename);
+                    $drapeauFile->move($this->uploadDir, $newFilename);
+                    $pays->setDrapeau($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload du drapeau');
+                    return $this->redirectToRoute('app_pays_edit', ['id' => $pays->getId()]);
+                }
             }
 
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_pays_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_pays_index');
         }
 
         return $this->render('pays/edit.html.twig', [
@@ -124,10 +121,18 @@ class PaysController extends AbstractController
     public function delete(Request $request, Pays $pays, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$pays->getId(), $request->request->get('_token'))) {
+            // Supprimer le drapeau si il existe
+            if ($pays->getDrapeau()) {
+                $drapeauFile = $this->uploadDir . '/' . $pays->getDrapeau();
+                if (file_exists($drapeauFile)) {
+                    unlink($drapeauFile);
+                }
+            }
+
             $entityManager->remove($pays);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_pays_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_pays_index');
     }
 }

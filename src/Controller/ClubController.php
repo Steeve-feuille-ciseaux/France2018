@@ -16,6 +16,16 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[Route('/club')]
 class ClubController extends AbstractController
 {
+    private string $uploadDir;
+
+    public function __construct(string $projectDir)
+    {
+        $this->uploadDir = $projectDir . '/public/uploads/blasons';
+        if (!file_exists($this->uploadDir)) {
+            mkdir($this->uploadDir, 0777, true);
+        }
+    }
+
     #[Route('/', name: 'app_club_index', methods: ['GET'])]
     public function index(ClubRepository $clubRepository): Response
     {
@@ -31,13 +41,6 @@ class ClubController extends AbstractController
         $form = $this->createForm(ClubType::class, $club);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && !$form->isValid()) {
-            return $this->render('club/check.html.twig', [
-                'club' => $club,
-                'form' => $form,
-            ]);
-        }
-
         if ($form->isSubmitted() && $form->isValid()) {
             $blasonFile = $form->get('blason')->getData();
             if ($blasonFile) {
@@ -46,21 +49,18 @@ class ClubController extends AbstractController
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$blasonFile->guessExtension();
 
                 try {
-                    $blasonFile->move(
-                        $this->getParameter('blasons_directory'),
-                        $newFilename
-                    );
+                    $blasonFile->move($this->uploadDir, $newFilename);
+                    $club->setBlason($newFilename);
                 } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
+                    $this->addFlash('error', 'Erreur lors de l\'upload du blason');
+                    return $this->redirectToRoute('app_club_new');
                 }
-
-                $club->setBlason($newFilename);
             }
 
             $entityManager->persist($club);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_club_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_club_index');
         }
 
         return $this->render('club/new.html.twig', [
@@ -83,13 +83,6 @@ class ClubController extends AbstractController
         $form = $this->createForm(ClubType::class, $club);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && !$form->isValid()) {
-            return $this->render('club/check.html.twig', [
-                'club' => $club,
-                'form' => $form,
-            ]);
-        }
-
         if ($form->isSubmitted() && $form->isValid()) {
             $blasonFile = $form->get('blason')->getData();
             if ($blasonFile) {
@@ -98,20 +91,24 @@ class ClubController extends AbstractController
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$blasonFile->guessExtension();
 
                 try {
-                    $blasonFile->move(
-                        $this->getParameter('blasons_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
-                }
+                    // Supprimer l'ancien blason si il existe
+                    if ($club->getBlason()) {
+                        $oldFile = $this->uploadDir . '/' . $club->getBlason();
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
+                        }
+                    }
 
-                $club->setBlason($newFilename);
+                    $blasonFile->move($this->uploadDir, $newFilename);
+                    $club->setBlason($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload du blason');
+                    return $this->redirectToRoute('app_club_edit', ['id' => $club->getId()]);
+                }
             }
 
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_club_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_club_index');
         }
 
         return $this->render('club/edit.html.twig', [
@@ -124,10 +121,18 @@ class ClubController extends AbstractController
     public function delete(Request $request, Club $club, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$club->getId(), $request->request->get('_token'))) {
+            // Supprimer le blason si il existe
+            if ($club->getBlason()) {
+                $blasonFile = $this->uploadDir . '/' . $club->getBlason();
+                if (file_exists($blasonFile)) {
+                    unlink($blasonFile);
+                }
+            }
+
             $entityManager->remove($club);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_club_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_club_index');
     }
 }
