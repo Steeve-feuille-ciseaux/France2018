@@ -143,7 +143,15 @@ class CardController extends AbstractController
         }
 
         $card = $tempCard['card'];
-        
+
+        // Validation des champs requis
+        if (!$card->getStartSeason() || !$card->getPlayer() || !$card->getPosition() || !$card->getNumber()) {
+            $this->addFlash('error', 'Tous les champs requis doivent être remplis.');
+            return $this->redirectToRoute($tempCard['is_new'] ? 'app_card_new' : 'app_card_edit', [
+                'id' => $card->getId()
+            ]);
+        }
+
         // Si c'est une modification, on récupère l'entité existante
         if (!$tempCard['is_new']) {
             $existingCard = $cardRepository->find($card->getId());

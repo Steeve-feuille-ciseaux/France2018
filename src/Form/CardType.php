@@ -15,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class CardType extends AbstractType
 {
@@ -93,10 +94,17 @@ class CardType extends AbstractType
             ])
             ->add('startSeason', IntegerType::class, [
                 'label' => 'Début de saison',
+                'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'La saison de début est requise'
+                    ])
+                ],
                 'attr' => [
                     'min' => 1900,
                     'max' => date('Y'),
-                    'placeholder' => 'Année de début'
+                    'placeholder' => 'Année de début (requis)',
+                    'class' => 'form-control mb-3'
                 ]
             ])
             ->add('endSeason', IntegerType::class, [
