@@ -140,16 +140,18 @@ class PlayerType extends AbstractType
                 'required' => false,
                 'constraints' => [
                     new File([
-                        'maxSize' => '1024k',
+                        'maxSize' => '2M',
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
                         ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG ou PNG)',
+                        'mimeTypesMessage' => 'Veuillez uploader une image JPG ou PNG',
+                        'maxSizeMessage' => 'L\'image ne doit pas dépasser 2 Mo'
                     ])
                 ],
                 'attr' => [
-                    'class' => 'form-control'
+                    'class' => 'form-control',
+                    'accept' => 'image/jpeg,image/png'
                 ]
             ])
         ;
