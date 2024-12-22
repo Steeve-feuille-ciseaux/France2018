@@ -38,13 +38,13 @@ class Player
     #[Assert\Range(min: 1, max: 99)]
     private ?int $jerseyNumber = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    private ?string $currentClub = null;
+    #[ORM\ManyToOne(inversedBy: 'players')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Club $club = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank]
-    private ?string $nationality = null;
+    #[ORM\ManyToOne(inversedBy: 'players')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Pays $nationality = null;
 
     #[ORM\Column]
     private ?int $worldCups = 0;
@@ -135,23 +135,23 @@ class Player
         return $this;
     }
 
-    public function getCurrentClub(): ?string
+    public function getClub(): ?Club
     {
-        return $this->currentClub;
+        return $this->club;
     }
 
-    public function setCurrentClub(string $currentClub): static
+    public function setClub(?Club $club): static
     {
-        $this->currentClub = $currentClub;
+        $this->club = $club;
         return $this;
     }
 
-    public function getNationality(): ?string
+    public function getNationality(): ?Pays
     {
         return $this->nationality;
     }
 
-    public function setNationality(string $nationality): static
+    public function setNationality(?Pays $nationality): static
     {
         $this->nationality = $nationality;
         return $this;

@@ -39,8 +39,12 @@ class Card
     #[ORM\JoinColumn(nullable: false)]
     private ?Player $player = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $club = null;
+    #[ORM\Column(nullable: true, options: ["default" => false])]
+    private ?bool $obtenu = false;
+
+    #[ORM\ManyToOne(inversedBy: 'cards')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Club $club = null;
 
     public function getId(): ?int
     {
@@ -135,14 +139,25 @@ class Card
         return $this;
     }
 
-    public function getClub(): ?string
+    public function getClub(): ?Club
     {
         return $this->club;
     }
 
-    public function setClub(string $club): static
+    public function setClub(?Club $club): static
     {
         $this->club = $club;
+        return $this;
+    }
+
+    public function isObtenu(): ?bool
+    {
+        return $this->obtenu;
+    }
+
+    public function setObtenu(?bool $obtenu): static
+    {
+        $this->obtenu = $obtenu;
         return $this;
     }
 }

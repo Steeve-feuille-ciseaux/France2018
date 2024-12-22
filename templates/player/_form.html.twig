@@ -1,0 +1,48 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.firstName) }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.lastName) }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.birthDate) }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.nationality) }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.position) }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.jerseyNumber) }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.club) }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.worldCups) }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-3">
+            {{ form_row(form.photoFile) }}
+            <small class="form-text text-muted">
+                Formats acceptés : JPG, PNG. Taille maximale : 1MB
+            </small>
+        </div>
+    </div>
+
+    <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+{{ form_end(form) }}

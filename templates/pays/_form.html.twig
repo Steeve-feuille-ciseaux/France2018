@@ -1,0 +1,6 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+    {{ form_row(form.nom) }}
+    {{ form_row(form.histoire) }}
+    {{ form_row(form.drapeau) }}
+    <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+{{ form_end(form) }}

@@ -1,102 +1,90 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Joueurs{% endblock %}
+{% block title %}Liste des joueurs{% endblock %}
 
 {% block body %}
-    <h1>Liste des Joueurs</h1>
-
-    {% for position, players in players_by_position %}
-        <div class="position-section mb-5">
-            <h2 class="position-title">{{ position }}s</h2>
-            <div class="player-grid">
-                {% for player in players %}
-                    <div class="player-card">
-                        {% if player.photoFilename %}
-                            <img src="{{ asset('uploads/player/' ~ player.photoFilename) }}" 
-                                 alt="{{ player.firstName }} {{ player.lastName }}"
-                                 class="player-image">
-                        {% else %}
-                            <div class="player-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-user fa-4x" style="color: #ccc;"></i>
-                            </div>
-                        {% endif %}
-                        
-                        <div class="player-info">
-                            <h3 class="player-name">{{ player.firstName }} {{ player.lastName }}</h3>
-                            <div class="player-details">
-                                <p><strong>Club:</strong> {{ player.currentClub }}</p>
-                            </div>
-                            <div class="action-buttons">
-                                <a href="{{ path('app_player_show', {'id': player.id}) }}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> Voir
-                                </a>
-                                <a href="{{ path('app_player_edit', {'id': player.id}) }}" class="btn btn-secondary">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Liste des joueurs</h1>
+            <a href="{{ path('app_player_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Nouveau joueur
+            </a>
         </div>
-    {% endfor %}
 
-    <a href="{{ path('app_player_new') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Ajouter un nouveau joueur
-    </a>
+        <div class="row">
+            {% for position, players in players_by_position %}
+                <div class="col-12 mb-4">
+                    <h2 class="position-title">{{ position }}s</h2>
+                    <div class="row">
+                        {% for player in players %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    {% if player.photoFilename %}
+                                        <img src="{{ asset('uploads/player/' ~ player.photoFilename) }}" 
+                                             class="card-img-top" 
+                                             alt="{{ player.firstName }} {{ player.lastName }}"
+                                             style="height: 250px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                            <i class="fas fa-user fa-4x text-secondary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ player.firstName }} {{ player.lastName }}</h5>
+                                        <p class="card-text">
+                                            <strong>Club:</strong> {{ player.club.nom }}<br>
+                                            <strong>Numéro:</strong> {{ player.jerseyNumber }}<br>
+                                            <strong>Nationalité:</strong> {{ player.nationality.nom }}
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-white border-top-0">
+                                        <div class="btn-group w-100">
+                                            <a href="{{ path('app_player_show', {'id': player.id}) }}" class="btn btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_player_edit', {'id': player.id}) }}" class="btn btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Aucun joueur trouvé
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .position-section {
-            margin-bottom: 3rem;
-        }
         .position-title {
-            color: var(--primary-color);
+            color: #1a237e;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid #1a237e;
             margin-bottom: 1.5rem;
         }
-        .player-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+        .card {
+            transition: transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .player-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        .player-card img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            object-position: center;
-            border-radius: 8px 8px 0 0;
-        }
-        .player-card:hover {
+        .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .player-info {
-            padding: 1rem;
+        .btn-group {
+            gap: 5px;
         }
-        .player-name {
-            font-size: 1.25rem;
-            margin: 0 0 0.5rem 0;
-        }
-        .player-details {
-            color: var(--gray-color);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+        .card-footer {
+            background-color: transparent;
         }
     </style>
 {% endblock %}

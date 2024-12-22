@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Clubs{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Liste des clubs</h1>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Blason</th>
+                    <th>Nom</th>
+                    <th>Pays</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for club in clubs %}
+                <tr>
+                    <td>
+                        {% if club.blason %}
+                            <img src="{{ asset('uploads/blasons/' ~ club.blason) }}" alt="Blason {{ club.nom }}" style="max-height: 50px;">
+                        {% endif %}
+                    </td>
+                    <td>{{ club.nom }}</td>
+                    <td>{{ club.pays ? club.pays.nom : '' }}</td>
+                    <td>
+                        <a href="{{ path('app_club_show', {'id': club.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                        <a href="{{ path('app_club_edit', {'id': club.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">Aucun club trouvé</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ path('app_club_new') }}" class="btn btn-primary">Créer un nouveau club</a>
+    </div>
+{% endblock %}

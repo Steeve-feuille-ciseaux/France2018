@@ -1,6 +1,5 @@
 parameters:
     players_directory: '%kernel.project_dir%/public/uploads/player'
-    cards_directory: '%kernel.project_dir%/public/uploads/cards'
 
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.

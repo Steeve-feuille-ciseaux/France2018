@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Player;
 use App\Form\PlayerType;
 use App\Repository\PlayerRepository;
+use App\Repository\ClubRepository;
+use App\Repository\PaysRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,10 +18,14 @@ use Psr\Log\LoggerInterface;
 #[Route('/player')]
 class PlayerController extends AbstractController
 {
-    public function __construct(private LoggerInterface $logger)
-    {
+    public function __construct(
+        private LoggerInterface $logger,
+        private EntityManagerInterface $entityManager,
+        private ClubRepository $clubRepository,
+        private PaysRepository $paysRepository
+    ) {
         // Créer le dossier uploads s'il n'existe pas
-        $uploadDir = dirname(__DIR__, 2) . '/public/uploads/players';
+        $uploadDir = dirname(__DIR__, 2) . '/public/uploads/player';
         if (!file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -46,16 +52,6 @@ class PlayerController extends AbstractController
                 $playersByPosition[$position] = [];
             }
             $playersByPosition[$position][] = $player;
-            
-            // Log pour vérifier les photos
-            if ($player->getPhotoFilename()) {
-                $photoPath = $this->getParameter('players_directory').'/'.$player->getPhotoFilename();
-                $this->logger->info('Photo path for player {player}: {path} (exists: {exists})', [
-                    'player' => $player->getFirstName() . ' ' . $player->getLastName(),
-                    'path' => $photoPath,
-                    'exists' => file_exists($photoPath) ? 'yes' : 'no'
-                ]);
-            }
         }
         
         // Trier le tableau des positions selon l'ordre personnalisé
@@ -80,15 +76,11 @@ class PlayerController extends AbstractController
             $player->setFirstName($tempData['firstName']);
             $player->setLastName($tempData['lastName']);
             $player->setBirthDate(new \DateTime($tempData['birthDate']));
-            $player->setNationality($tempData['nationality']);
+            $player->setNationality($this->paysRepository->find($tempData['nationality']));
             $player->setPosition($tempData['position']);
             $player->setJerseyNumber($tempData['jerseyNumber']);
-            $player->setCurrentClub($tempData['currentClub']);
+            $player->setClub($this->clubRepository->find($tempData['club']));
             $player->setWorldCups($tempData['worldCups']);
-            $player->setChampionsLeague($tempData['championsLeague']);
-            $player->setEuropeLeague($tempData['europeLeague']);
-            $player->setNationalChampionship($tempData['nationalChampionship']);
-            $player->setNationalCup($tempData['nationalCup']);
             
             // Supprimer les données temporaires
             $session->remove('player_temp_data');
@@ -98,31 +90,23 @@ class PlayerController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $photoFile = $form->get('photo')->getData();
+            // Stocker le fichier photo temporairement en session
+            $photoFile = $form->get('photoFile')->getData();
+            $photoData = null;
             if ($photoFile) {
-                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
-
-                try {
-                    $uploadDir = $this->getParameter('players_directory');
-                    $this->logger->info('Uploading new photo to: {path}', [
-                        'path' => $uploadDir.'/'.$newFilename
-                    ]);
-
-                    $photoFile->move($uploadDir, $newFilename);
-                    $player->setPhotoFilename($newFilename);
-                } catch (\Exception $e) {
-                    $this->logger->error('Error uploading photo: {error}', [
-                        'error' => $e->getMessage()
-                    ]);
-                }
+                $photoData = [
+                    'name' => $photoFile->getClientOriginalName(),
+                    'tmp_name' => $photoFile->getPathname(),
+                    'type' => $photoFile->getMimeType(),
+                ];
             }
 
             // Stocker les données du joueur en session pour la vérification
             $session->set('player_data', [
                 'player' => $player,
-                'photo_filename' => $player->getPhotoFilename()
+                'photo_data' => $photoData,
+                'club_id' => $player->getClub()->getId(),
+                'nationality_id' => $player->getNationality()->getId()
             ]);
 
             return $this->redirectToRoute('app_player_check');
@@ -135,7 +119,7 @@ class PlayerController extends AbstractController
     }
 
     #[Route('/check', name: 'app_player_check', methods: ['GET', 'POST'])]
-    public function check(Request $request, EntityManagerInterface $entityManager): Response
+    public function check(Request $request, SluggerInterface $slugger): Response
     {
         $session = $request->getSession();
         $playerData = $session->get('player_data');
@@ -145,11 +129,84 @@ class PlayerController extends AbstractController
         }
 
         $player = $playerData['player'];
+        $photoData = $playerData['photo_data'];
+        $tmpPhotoFilename = null;
+        
+        // Si une photo a été uploadée, la stocker temporairement
+        if ($photoData) {
+            $originalFilename = pathinfo($photoData['name'], PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $extension = $photoData['type'] === 'image/png' ? 'png' : 'jpg';
+            $tmpPhotoFilename = 'tmp-'.$safeFilename.'-'.uniqid().'.'.$extension;
+
+            try {
+                $uploadDir = $this->getParameter('players_directory').'/tmp';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                // Créer un fichier temporaire pour la prévisualisation
+                $tmpFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                    $photoData['tmp_name'],
+                    $photoData['name'],
+                    $photoData['type'],
+                    null,
+                    true
+                );
+                $tmpFile->move($uploadDir, $tmpPhotoFilename);
+                
+                // Mettre à jour les données de session avec le nom du fichier temporaire
+                $photoData['preview_filename'] = $tmpPhotoFilename;
+                $session->set('player_data', [
+                    'player' => $player,
+                    'photo_data' => $photoData,
+                    'club_id' => $playerData['club_id'],
+                    'nationality_id' => $playerData['nationality_id']
+                ]);
+            } catch (\Exception $e) {
+                $this->logger->error('Error creating preview: {error}', [
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        // Récupérer les entités Club et Pays depuis la base de données
+        $club = $this->clubRepository->find($playerData['club_id']);
+        $nationality = $this->paysRepository->find($playerData['nationality_id']);
+        
+        if (!$club || !$nationality) {
+            $this->addFlash('error', 'Club ou pays invalide');
+            return $this->redirectToRoute('app_player_new');
+        }
+        
+        $player->setClub($club);
+        $player->setNationality($nationality);
 
         if ($request->isMethod('POST')) {
             if ($request->request->get('action') === 'confirm') {
-                $entityManager->persist($player);
-                $entityManager->flush();
+                // Si une photo a été uploadée, la déplacer du dossier temporaire vers le dossier final
+                if ($photoData && isset($photoData['preview_filename'])) {
+                    try {
+                        $tmpPath = $this->getParameter('players_directory').'/tmp/'.$photoData['preview_filename'];
+                        $finalFilename = str_replace('tmp-', '', $photoData['preview_filename']);
+                        $finalPath = $this->getParameter('players_directory').'/'.$finalFilename;
+                        
+                        if (rename($tmpPath, $finalPath)) {
+                            $player->setPhotoFilename($finalFilename);
+                        }
+                    } catch (\Exception $e) {
+                        $this->logger->error('Error moving photo: {error}', [
+                            'error' => $e->getMessage()
+                        ]);
+                        $this->addFlash('error', 'Erreur lors du déplacement de la photo');
+                    }
+                }
+
+                $this->entityManager->persist($player);
+                $this->entityManager->flush();
+
+                // Nettoyer le dossier temporaire
+                $this->cleanupTempFiles();
 
                 $session->remove('player_data');
                 return $this->redirectToRoute('app_player_index');
@@ -159,16 +216,15 @@ class PlayerController extends AbstractController
                     'firstName' => $player->getFirstName(),
                     'lastName' => $player->getLastName(),
                     'birthDate' => $player->getBirthDate()->format('Y-m-d'),
-                    'nationality' => $player->getNationality(),
+                    'nationality' => $player->getNationality()->getId(),
                     'position' => $player->getPosition(),
                     'jerseyNumber' => $player->getJerseyNumber(),
-                    'currentClub' => $player->getCurrentClub(),
-                    'worldCups' => $player->getWorldCups(),
-                    'championsLeague' => $player->getChampionsLeague(),
-                    'europeLeague' => $player->getEuropeLeague(),
-                    'nationalChampionship' => $player->getNationalChampionship(),
-                    'nationalCup' => $player->getNationalCup()
+                    'club' => $player->getClub()->getId(),
+                    'worldCups' => $player->getWorldCups()
                 ]);
+                
+                // Nettoyer le dossier temporaire
+                $this->cleanupTempFiles();
                 
                 $session->remove('player_data');
                 return $this->redirectToRoute('app_player_new');
@@ -177,7 +233,22 @@ class PlayerController extends AbstractController
 
         return $this->render('player/check.html.twig', [
             'player' => $player,
+            'has_photo' => $photoData !== null,
+            'photo_preview' => $photoData['preview_filename'] ?? null
         ]);
+    }
+
+    private function cleanupTempFiles(): void
+    {
+        $tmpDir = $this->getParameter('players_directory').'/tmp';
+        if (file_exists($tmpDir)) {
+            $files = glob($tmpDir.'/*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+        }
     }
 
     #[Route('/{id}', name: 'app_player_show', methods: ['GET'])]
@@ -189,13 +260,13 @@ class PlayerController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_player_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Player $player, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function edit(Request $request, Player $player, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(PlayerType::class, $player);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $photoFile = $form->get('photo')->getData();
+            $photoFile = $form->get('photoFile')->getData();
             if ($photoFile) {
                 $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
@@ -203,7 +274,7 @@ class PlayerController extends AbstractController
 
                 try {
                     $uploadDir = $this->getParameter('players_directory');
-                    $this->logger->info('Uploading edited photo to: {path}', [
+                    $this->logger->info('Uploading new photo to: {path}', [
                         'path' => $uploadDir.'/'.$newFilename
                     ]);
 
@@ -211,12 +282,9 @@ class PlayerController extends AbstractController
                     
                     // Supprimer l'ancienne photo si elle existe
                     if ($player->getPhotoFilename()) {
-                        $oldPhotoPath = $uploadDir.'/'.$player->getPhotoFilename();
-                        if (file_exists($oldPhotoPath)) {
-                            unlink($oldPhotoPath);
-                            $this->logger->info('Deleted old photo: {path}', [
-                                'path' => $oldPhotoPath
-                            ]);
+                        $oldFile = $uploadDir.'/'.$player->getPhotoFilename();
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
                         }
                     }
                     
@@ -228,7 +296,7 @@ class PlayerController extends AbstractController
                 }
             }
 
-            $entityManager->flush();
+            $this->entityManager->flush();
 
             return $this->redirectToRoute('app_player_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -240,24 +308,20 @@ class PlayerController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_player_delete', methods: ['POST'])]
-    public function delete(Request $request, Player $player, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Player $player): Response
     {
         if ($this->isCsrfTokenValid('delete'.$player->getId(), $request->request->get('_token'))) {
             // Supprimer la photo si elle existe
             if ($player->getPhotoFilename()) {
-                $photoPath = $this->getParameter('players_directory').'/'.$player->getPhotoFilename();
-                if (file_exists($photoPath)) {
-                    unlink($photoPath);
-                    $this->logger->info('Deleted photo during player deletion: {path}', [
-                        'path' => $photoPath
-                    ]);
+                $uploadDir = $this->getParameter('players_directory');
+                $oldFile = $uploadDir.'/'.$player->getPhotoFilename();
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
                 }
             }
-
-            $entityManager->remove($player);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Le joueur a été supprimé avec succès.');
+            
+            $this->entityManager->remove($player);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_player_index', [], Response::HTTP_SEE_OTHER);

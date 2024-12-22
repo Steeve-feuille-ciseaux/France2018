@@ -169,30 +169,68 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_player_index') }}">
-                                    <i class="fas fa-list me-1"></i>
-                                    Liste des joueurs
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="playersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-users me-1"></i>
+                                    Joueurs
                                 </a>
+                                <ul class="dropdown-menu" aria-labelledby="playersDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_player_index') }}">
+                                            <i class="fas fa-list me-1"></i>
+                                            Liste des joueurs
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_player_new') }}">
+                                            <i class="fas fa-user-plus me-1"></i>
+                                            Nouveau joueur
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_card_index') }}">
-                                    <i class="fas fa-id-card me-1"></i>
-                                    Liste des cartes
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="clubsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Clubs
                                 </a>
+                                <ul class="dropdown-menu" aria-labelledby="clubsDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_club_index') }}">
+                                            <i class="fas fa-list me-1"></i>
+                                            Liste des clubs
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_club_new') }}">
+                                            <i class="fas fa-plus me-1"></i>
+                                            Nouveau club
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_card_new') }}">
-                                    <i class="fas fa-id-card me-1"></i>
-                                    Nouvelle carte
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="paysDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-globe me-1"></i>
+                                    Pays
                                 </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_player_new') }}">
-                                    <i class="fas fa-user-plus me-1"></i>
-                                    Nouveau joueur
-                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="paysDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_pays_index') }}">
+                                            <i class="fas fa-list me-1"></i>
+                                            Liste des pays
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_pays_new') }}">
+                                            <i class="fas fa-plus me-1"></i>
+                                            Nouveau pays
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </div>

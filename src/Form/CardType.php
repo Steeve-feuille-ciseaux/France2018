@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Card;
+use App\Entity\Club;
 use App\Entity\Player;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -32,11 +33,14 @@ class CardType extends AbstractType
                     'class' => 'form-select mb-3'
                 ]
             ])
-            ->add('club', TextType::class, [
-                'label' => 'Club',
+            ->add('club', EntityType::class, [
+                'class' => Club::class,
+                'choice_label' => 'nom',
+                'placeholder' => 'Choisir un club...',
                 'required' => true,
+                'label' => 'Club',
                 'attr' => [
-                    'placeholder' => 'Nom du club'
+                    'class' => 'form-select mb-3'
                 ]
             ])
             ->add('summary', TextareaType::class, [
@@ -101,7 +105,7 @@ class CardType extends AbstractType
                 'attr' => [
                     'min' => 1900,
                     'max' => date('Y'),
-                    'placeholder' => 'Année de fin (optionnel)'
+                    'placeholder' => 'Année de fin'
                 ]
             ])
         ;

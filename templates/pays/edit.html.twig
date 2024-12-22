@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Pays{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Modifier le pays</h1>
+
+        {{ include('pays/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+        <div class="mt-3">
+            <a href="{{ path('app_pays_index') }}" class="btn btn-secondary">Retour à la liste</a>
+
+            {{ include('pays/_delete_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Pays{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Liste des pays</h1>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Drapeau</th>
+                    <th>Nom</th>
+                    <th>Nombre de clubs</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for pays in pays %}
+                <tr>
+                    <td>
+                        {% if pays.drapeau %}
+                            <img src="{{ asset('uploads/drapeaux/' ~ pays.drapeau) }}" alt="Drapeau {{ pays.nom }}" style="max-height: 30px;">
+                        {% endif %}
+                    </td>
+                    <td>{{ pays.nom }}</td>
+                    <td>{{ pays.clubs|length }}</td>
+                    <td>
+                        <a href="{{ path('app_pays_show', {'id': pays.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                        <a href="{{ path('app_pays_edit', {'id': pays.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">Aucun pays trouvé</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ path('app_pays_new') }}" class="btn btn-primary">Créer un nouveau pays</a>
+    </div>
+{% endblock %}

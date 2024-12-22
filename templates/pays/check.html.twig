@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vérification des données{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Attention !</h4>
+            <p>Certaines informations saisies nécessitent votre attention :</p>
+            {% if not form.vars.valid %}
+                <ul>
+                    {% for child in form.children %}
+                        {% for error in child.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        {{ include('pays/_form.html.twig') }}
+
+        <a href="{{ path('app_pays_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+    </div>
+{% endblock %}

@@ -3,16 +3,20 @@
 namespace App\Form;
 
 use App\Entity\Player;
+use App\Entity\Club;
+use App\Entity\Pays;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 
 class PlayerType extends AbstractType
 {
@@ -21,80 +25,117 @@ class PlayerType extends AbstractType
         $builder
             ->add('firstName', TextType::class, [
                 'label' => 'Prénom',
-                'attr' => ['class' => 'form-control']
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer un prénom'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-control'
+                ]
             ])
             ->add('lastName', TextType::class, [
                 'label' => 'Nom',
-                'attr' => ['class' => 'form-control']
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer un nom'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-control'
+                ]
             ])
             ->add('birthDate', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer une date de naissance'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-control'
+                ]
             ])
             ->add('position', ChoiceType::class, [
-                'label' => 'Poste',
+                'label' => 'Position',
                 'choices' => [
-                    'Gardien' => 'Gardien',
-                    'Défenseur' => 'Défenseur',
+                    'Attaquant' => 'Attaquant',
                     'Milieu' => 'Milieu',
-                    'Attaquant' => 'Attaquant'
+                    'Défenseur' => 'Défenseur',
+                    'Gardien' => 'Gardien'
                 ],
-                'attr' => ['class' => 'form-control']
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez sélectionner une position'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-select'
+                ]
             ])
             ->add('jerseyNumber', IntegerType::class, [
-                'label' => 'Numéro de maillot',
+                'label' => 'Numéro',
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer un numéro'
+                    ]),
+                    new Range([
+                        'min' => 1,
+                        'max' => 99,
+                        'notInRangeMessage' => 'Le numéro doit être compris entre {{ min }} et {{ max }}'
+                    ])
+                ],
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
                     'max' => 99
                 ]
             ])
-            ->add('currentClub', TextType::class, [
-                'label' => 'Club actuel',
-                'attr' => ['class' => 'form-control']
+            ->add('club', EntityType::class, [
+                'class' => Club::class,
+                'choice_label' => 'nom',
+                'placeholder' => 'Choisir un club',
+                'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez sélectionner un club'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-select'
+                ]
             ])
-            ->add('nationality', TextType::class, [
-                'label' => 'Nationalité',
-                'attr' => ['class' => 'form-control']
+            ->add('nationality', EntityType::class, [
+                'class' => Pays::class,
+                'choice_label' => 'nom',
+                'placeholder' => 'Choisir un pays',
+                'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez sélectionner un pays'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-select'
+                ]
             ])
             ->add('worldCups', IntegerType::class, [
-                'label' => 'Coupes du Monde',
+                'label' => 'Coupes du monde',
+                'required' => false,
+                'constraints' => [
+                    new Range([
+                        'min' => 0,
+                        'minMessage' => 'Le nombre de coupes du monde ne peut pas être négatif'
+                    ])
+                ],
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 0
                 ]
             ])
-            ->add('championsLeague', IntegerType::class, [
-                'label' => 'Ligues des Champions',
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => 0
-                ]
-            ])
-            ->add('europeLeague', IntegerType::class, [
-                'label' => 'Ligues Europa',
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => 0
-                ]
-            ])
-            ->add('nationalChampionship', IntegerType::class, [
-                'label' => 'Championnats Nationaux',
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => 0
-                ]
-            ])
-            ->add('nationalCup', IntegerType::class, [
-                'label' => 'Coupes Nationales',
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => 0
-                ]
-            ])
-            ->add('photo', FileType::class, [
-                'label' => 'Photo du joueur',
+            ->add('photoFile', FileType::class, [
+                'label' => 'Photo',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
@@ -107,14 +148,8 @@ class PlayerType extends AbstractType
                         'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG ou PNG)',
                     ])
                 ],
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('summary', TextareaType::class, [
-                'label' => 'Résumé',
-                'required' => false,
                 'attr' => [
-                    'rows' => 5,
-                    'placeholder' => 'Résumé du joueur...'
+                    'class' => 'form-control'
                 ]
             ])
         ;
