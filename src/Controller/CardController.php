@@ -6,6 +6,7 @@ use App\Entity\Card;
 use App\Form\CardType;
 use App\Repository\CardRepository;
 use App\Repository\PlayerRepository;
+use App\Repository\ClubRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,18 +28,27 @@ class CardController extends AbstractController
     }
 
     #[Route('/new', name: 'app_card_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, SessionInterface $session, PlayerRepository $playerRepository): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SluggerInterface $slugger,
+        SessionInterface $session,
+        PlayerRepository $playerRepository,
+        ClubRepository $clubRepository
+    ): Response {
         $card = new Card();
         
-        // Si on revient de la page de vérification
-        $tempCard = $session->get('temp_card');
-        if ($tempCard && !$tempCard['card']->getId()) {
-            $card = $tempCard['card'];
-            // Recharger l'entité Player depuis la base de données
+        // Récupérer les données de session si on revient de la vérification
+        $tempData = $session->get('temp_card');
+        if ($tempData) {
+            $card = $tempData['card'];
             if ($card->getPlayer()) {
                 $card->setPlayer($playerRepository->find($card->getPlayer()->getId()));
             }
+            if ($card->getClub()) {
+                $card->setClub($clubRepository->find($card->getClub()->getId()));
+            }
+            $session->remove('temp_card');
         }
         
         $form = $this->createForm(CardType::class, $card);
@@ -58,16 +68,24 @@ class CardController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    // ... gérer l'exception si quelque chose se passe pendant le téléchargement du fichier
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image');
+                    return $this->redirectToRoute('app_card_new');
                 }
 
                 $card->setImageFilename($newFilename);
             }
 
-            // Au lieu de persister directement, on stocke dans la session
+            // Recharger les entités
+            if ($card->getPlayer()) {
+                $card->setPlayer($playerRepository->find($card->getPlayer()->getId()));
+            }
+            if ($card->getClub()) {
+                $card->setClub($clubRepository->find($card->getClub()->getId()));
+            }
+
+            // Stocker dans la session
             $session->set('temp_card', [
                 'card' => $card,
-                'image_path' => $imageFile ? $this->getParameter('cards_directory').'/'.$newFilename : null,
                 'is_new' => true
             ]);
 
@@ -76,7 +94,7 @@ class CardController extends AbstractController
 
         return $this->render('card/new.html.twig', [
             'card' => $card,
-            'form' => $form,
+            'form' => $form
         ]);
     }
 
@@ -130,13 +148,18 @@ class CardController extends AbstractController
         ]);
     }
 
-    #[Route('/confirm', name: 'app_card_confirm', methods: ['POST'])]
-    public function confirm(Request $request, EntityManagerInterface $entityManager, SessionInterface $session, PlayerRepository $playerRepository, CardRepository $cardRepository): Response
+    #[Route('/confirm/{action}/{id}', name: 'app_card_confirm', methods: ['GET'])]
+    public function confirm(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SessionInterface $session,
+        PlayerRepository $playerRepository,
+        ClubRepository $clubRepository,
+        CardRepository $cardRepository,
+        string $action,
+        ?int $id = null
+    ): Response
     {
-        if (!$this->isCsrfTokenValid('confirm', $request->request->get('_token'))) {
-            return $this->redirectToRoute('app_card_index');
-        }
-
         $tempCard = $session->get('temp_card');
         if (!$tempCard) {
             return $this->redirectToRoute('app_card_index');
@@ -144,23 +167,23 @@ class CardController extends AbstractController
 
         $card = $tempCard['card'];
 
-        // Validation des champs requis
-        if (!$card->getStartSeason() || !$card->getPlayer() || !$card->getPosition() || !$card->getNumber()) {
-            $this->addFlash('error', 'Tous les champs requis doivent être remplis.');
-            return $this->redirectToRoute($tempCard['is_new'] ? 'app_card_new' : 'app_card_edit', [
-                'id' => $card->getId()
-            ]);
+        // Recharger les entités depuis la base de données
+        if ($card->getPlayer()) {
+            $card->setPlayer($playerRepository->find($card->getPlayer()->getId()));
+        }
+        if ($card->getClub()) {
+            $card->setClub($clubRepository->find($card->getClub()->getId()));
         }
 
-        // Si c'est une modification, on récupère l'entité existante
         if (!$tempCard['is_new']) {
+            // Pour une modification, récupérer l'entité existante
             $existingCard = $cardRepository->find($card->getId());
             if (!$existingCard) {
-                throw $this->createNotFoundException('La carte n\'existe pas');
+                throw $this->createNotFoundException('Card not found');
             }
-            
-            // Met à jour les propriétés de la carte existante
-            $existingCard->setPlayer($playerRepository->find($card->getPlayer()->getId()));
+
+            // Mettre à jour les propriétés
+            $existingCard->setPlayer($card->getPlayer());
             $existingCard->setClub($card->getClub());
             $existingCard->setPosition($card->getPosition());
             $existingCard->setNumber($card->getNumber());
@@ -170,24 +193,20 @@ class CardController extends AbstractController
             $existingCard->setNotableAction($card->getNotableAction());
             
             if ($card->getImageFilename() && $card->getImageFilename() !== $existingCard->getImageFilename()) {
-                // Supprime l'ancienne image si elle existe
+                // Supprimer l'ancienne image
                 if ($existingCard->getImageFilename()) {
-                    $oldImagePath = $this->getParameter('cards_directory').'/'.$existingCard->getImageFilename();
+                    $oldImagePath = $this->getParameter('cards_directory') . '/' . $existingCard->getImageFilename();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                 }
                 $existingCard->setImageFilename($card->getImageFilename());
             }
-            
-            $card = $existingCard;
+        } else {
+            $entityManager->persist($card);
         }
-        
-        // Persiste la carte
-        $entityManager->persist($card);
-        $entityManager->flush();
 
-        // Nettoie la session
+        $entityManager->flush();
         $session->remove('temp_card');
 
         $this->addFlash('success', 'La carte a été ' . ($tempCard['is_new'] ? 'créée' : 'modifiée') . ' avec succès.');

@@ -1,114 +1,56 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Vérification des informations de la carte{% endblock %}
+{% block title %}Vérification de la carte{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="h3 mb-0">Vérification des informations</h1>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Joueur</h5>
-                            <p>{{ card.player.firstName }} {{ card.player.lastName }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Club</h5>
-                            <p>{{ card.club }}</p>
-                        </div>
-                    </div>
+    <div class="container mt-4">
+        <h1>Vérification de la carte</h1>
 
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Numéro</h5>
-                            <p>{{ card.number }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Position</h5>
-                            <p>{{ card.position }}</p>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Saison de début</h5>
-                            <p>{{ card.startSeason }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Saison de fin</h5>
-                            <p>{{ card.endSeason ? card.endSeason : 'Non spécifiée' }}</p>
-                        </div>
-                    </div>
-
-                    {% if card.imageFilename %}
-                        <div class="mb-4">
-                            <h5 class="text-primary">Image</h5>
-                            <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" 
-                                 class="img-thumbnail" 
-                                 alt="Image de la carte"
-                                 style="max-height: 200px;">
-                        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ card.player.firstName }} {{ card.player.lastName }}</h5>
+                {% if card.club %}
+                    <h6 class="card-subtitle mb-2 text-muted">{{ card.club.nom }}</h6>
+                {% endif %}
+                <p class="card-text">
+                    <strong>Position:</strong> {{ card.position }}<br>
+                    <strong>Numéro:</strong> {{ card.number }}<br>
+                    <strong>Saison de début:</strong> {{ card.startSeason }}<br>
+                    {% if card.endSeason %}
+                        <strong>Saison de fin:</strong> {{ card.endSeason }}<br>
                     {% endif %}
-
-                    {% if card.summary %}
-                        <div class="mb-4">
-                            <h5 class="text-primary">Résumé</h5>
-                            <p>{{ card.summary }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if card.notableAction %}
-                        <div class="mb-4">
-                            <h5 class="text-primary">Action notable</h5>
-                            <p>{{ card.notableAction }}</p>
-                        </div>
-                    {% endif %}
-
-                    <div class="d-flex justify-content-between mt-4">
-                        <form method="post" action="{{ path('app_card_edit_back') }}" style="display: inline-block;">
-                            <input type="hidden" name="_token" value="{{ csrf_token('edit_back') }}">
-                            <button type="submit" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Modifier les informations
-                            </button>
-                        </form>
-
-                        <form method="post" action="{{ path('app_card_confirm') }}" style="display: inline-block;">
-                            <input type="hidden" name="_token" value="{{ csrf_token('confirm') }}">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check me-2"></i>Confirmer
-                            </button>
-                        </form>
+                </p>
+                {% if card.summary %}
+                    <div class="mb-3">
+                        <strong>Résumé:</strong><br>
+                        {{ card.summary }}
                     </div>
-                </div>
+                {% endif %}
+                {% if card.notableAction %}
+                    <div class="mb-3">
+                        <strong>Action notable:</strong><br>
+                        {{ card.notableAction }}
+                    </div>
+                {% endif %}
+                {% if card.imageFilename %}
+                    <div class="mb-3">
+                        <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" class="img-fluid" alt="Image de la carte">
+                    </div>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .card {
-            border: none;
-        }
-        .card-header {
-            background-color: #1a237e;
-        }
-        .text-primary {
-            color: #1a237e !important;
-        }
-        .btn-primary {
-            background-color: #1a237e;
-            border-color: #1a237e;
-        }
-        .btn-primary:hover {
-            background-color: #0d47a1;
-            border-color: #0d47a1;
-        }
-    </style>
+        <div class="d-flex justify-content-between">
+            <form method="post" action="{{ path('app_card_edit_back') }}" style="display: inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('edit_back') }}">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à l'édition
+                </button>
+            </form>
+
+            <a href="{{ path('app_card_confirm', {'action': is_new ? 'new' : 'edit', 'id': card.id}) }}" class="btn btn-success">
+                <i class="fas fa-check"></i> Confirmer
+            </a>
+        </div>
+    </div>
 {% endblock %}

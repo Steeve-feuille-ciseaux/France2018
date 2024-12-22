@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Card;
 use App\Entity\Club;
 use App\Entity\Player;
+use App\Repository\ClubRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -39,6 +40,10 @@ class CardType extends AbstractType
                 'choice_label' => 'nom',
                 'placeholder' => 'Choisir un club...',
                 'required' => true,
+                'query_builder' => function (ClubRepository $er) {
+                    return $er->createQueryBuilder('c')
+                        ->orderBy('c.nom', 'ASC');
+                },
                 'label' => 'Club',
                 'attr' => [
                     'class' => 'form-select mb-3'
