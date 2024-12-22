@@ -28,62 +28,104 @@
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <h5 class="text-primary">Joueur</h5>
+                                <div class="d-flex align-items-center">
+                                    {% if card.player.photoFilename %}
+                                        <img src="{{ asset('uploads/player/' ~ card.player.photoFilename) }}" 
+                                             alt="Photo de {{ card.player.firstName }} {{ card.player.lastName }}"
+                                             class="me-2 rounded"
+                                             style="max-height: 50px;">
+                                    {% endif %}
+                                    <div>
+                                        <a href="{{ path('app_player_show', {'id': card.player.id}) }}" class="text-decoration-none">
+                                            {{ card.player.firstName }} {{ card.player.lastName }}
+                                        </a><br>
+                                        <small class="text-muted">
+                                            {% if card.player.nationality.drapeau %}
+                                                <img src="{{ asset('uploads/drapeaux/' ~ card.player.nationality.drapeau) }}" 
+                                                     alt="Drapeau de {{ card.player.nationality.nom }}"
+                                                     class="me-1"
+                                                     style="max-height: 12px;">
+                                            {% endif %}
+                                            {{ card.player.nationality.nom }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Club</h5>
+                                <div class="d-flex align-items-center">
+                                    {% if card.club.blason %}
+                                        <img src="{{ asset('uploads/blasons/' ~ card.club.blason) }}" 
+                                             alt="Blason de {{ card.club.nom }}"
+                                             class="me-2"
+                                             style="max-height: 40px;">
+                                    {% endif %}
+                                    <div>
+                                        {{ card.club.nom }}<br>
+                                        <small class="text-muted">
+                                            {% if card.club.pays.drapeau %}
+                                                <img src="{{ asset('uploads/drapeaux/' ~ card.club.pays.drapeau) }}" 
+                                                     alt="Drapeau de {{ card.club.pays.nom }}"
+                                                     class="me-1"
+                                                     style="max-height: 12px;">
+                                            {% endif %}
+                                            {{ card.club.pays.nom }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Position et Numéro</h5>
                                 <p>
-                                    <a href="{{ path('app_player_show', {'id': card.player.id}) }}" class="text-decoration-none">
-                                        {{ card.player.firstName }} {{ card.player.lastName }}
-                                    </a>
+                                    <strong>Position:</strong> {{ card.position }}<br>
+                                    <strong>Numéro:</strong> {{ card.number }}
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <h5 class="text-primary">Position</h5>
-                                <p>{{ card.position }}</p>
+                                <h5 class="text-primary">Période</h5>
+                                <p>
+                                    <strong>Début:</strong> {{ card.startSeason }}<br>
+                                    {% if card.endSeason %}
+                                        <strong>Fin:</strong> {{ card.endSeason }}
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Numéro</h5>
-                                <p>{{ card.number }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Saison de début</h5>
-                                <p>{{ card.startSeason }}</p>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Saison de fin</h5>
-                                <p>{{ card.endSeason ? card.endSeason : 'Non spécifiée' }}</p>
-                            </div>
-                        </div>
-
-                        {% if card.summary %}
-                            <div class="mb-4">
-                                <h5 class="text-primary">Résumé</h5>
-                                <p class="card-text">{{ card.summary }}</p>
+                        {% if card.summary or card.notableAction %}
+                            <div class="row">
+                                {% if card.summary %}
+                                    <div class="col-12 mb-4">
+                                        <h5 class="text-primary">Résumé</h5>
+                                        <p>{{ card.summary|nl2br }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if card.notableAction %}
+                                    <div class="col-12">
+                                        <h5 class="text-primary">Action notable</h5>
+                                        <p>{{ card.notableAction|nl2br }}</p>
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endif %}
+                    </div>
 
-                        {% if card.notableAction %}
-                            <div class="mb-4">
-                                <h5 class="text-primary">Action notable</h5>
-                                <p class="card-text">{{ card.notableAction }}</p>
-                            </div>
-                        {% endif %}
-
-                        <div class="mt-4">
-                            <div class="btn-group w-100">
-                                <a href="{{ path('app_player_show', {'id': card.player.id}) }}" class="btn btn-secondary">
-                                    <i class="fas fa-user me-2"></i>Voir le joueur
-                                </a>
-                                <a href="{{ path('app_card_index') }}" class="btn btn-secondary">
-                                    <i class="fas fa-list me-2"></i>Liste des cartes
-                                </a>
-                                <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-primary">
-                                    <i class="fas fa-edit me-2"></i>Modifier
-                                </a>
-                            </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_card_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                            </a>
+                            <form method="post" action="{{ path('app_card_delete', {'id': card.id}) }}" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette carte ?');"
+                                  style="display: inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ card.id) }}">
+                                <button class="btn btn-danger">
+                                    <i class="fas fa-trash-alt me-2"></i>Supprimer
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -95,34 +137,10 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .card {
-            border: none;
-            overflow: hidden;
-        }
-        .card-header {
-            background-color: #1a237e !important;
-        }
         .card-detail-image {
-            max-height: 500px;
+            max-height: 400px;
             width: auto;
             object-fit: contain;
-        }
-        .text-primary {
-            color: #1a237e !important;
-        }
-        .btn-primary {
-            background-color: #1a237e;
-            border-color: #1a237e;
-        }
-        .btn-primary:hover {
-            background-color: #0d47a1;
-            border-color: #0d47a1;
-        }
-        .btn-group {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .card-text {
-            white-space: pre-line;
         }
     </style>
 {% endblock %}
