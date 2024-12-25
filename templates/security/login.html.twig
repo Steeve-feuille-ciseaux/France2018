@@ -12,7 +12,7 @@
                 </div>
                 <div class="card-body">
                     {% if error %}
-                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                        <div class="alert alert-danger">Mot de passe ou pseudo invalide</div>
                     {% endif %}
 
                     <form method="post">

@@ -7,6 +7,7 @@ use App\Form\CardType;
 use App\Repository\CardRepository;
 use App\Repository\PlayerRepository;
 use App\Repository\ClubRepository;
+use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +24,7 @@ class CardController extends AbstractController
     public function index(CardRepository $cardRepository): Response
     {
         return $this->render('card/index.html.twig', [
-            'cards' => $cardRepository->findAll(),
+            'cards' => $cardRepository->findBy(['visible' => true]),
         ]);
     }
 
@@ -31,12 +32,16 @@ class CardController extends AbstractController
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
-        SluggerInterface $slugger,
         SessionInterface $session,
         PlayerRepository $playerRepository,
-        ClubRepository $clubRepository
+        ClubRepository $clubRepository,
+        ProfilRepository $profilRepository
     ): Response {
         $card = new Card();
+        $user = $this->getUser();
+        $profil = $profilRepository->find($user->getId());
+        $card->setSignature($profil);
+        $card->setVisible(false);
         
         // Récupérer les données de session si on revient de la vérification
         $tempData = $session->get('temp_card');
@@ -290,6 +295,39 @@ class CardController extends AbstractController
             $this->addFlash('success', 'La carte a été supprimée avec succès.');
         }
 
+        return $this->redirectToRoute('app_card_index');
+    }
+
+    #[Route('/new/confirm', name: 'app_card_new_confirm', methods: ['GET', 'POST'])]
+    public function newConfirm(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SessionInterface $session,
+        SluggerInterface $slugger,
+        ProfilRepository $profilRepository
+    ): Response {
+        $tempData = $session->get('temp_card');
+        if (!$tempData) {
+            return $this->redirectToRoute('app_card_new');
+        }
+
+        $card = new Card();
+        $user = $this->getUser();
+        $profil = $profilRepository->find($user->getId());
+        $card->setSignature($profil);
+        $card->setPlayer($tempData['player']);
+        $card->setClub($tempData['club']);
+        $card->setNumber($tempData['number']);
+        $card->setPosition($tempData['position']);
+        $card->setStartSeason($tempData['startSeason']);
+        $card->setEndSeason($tempData['endSeason']);
+
+        $entityManager->persist($card);
+        $entityManager->flush();
+
+        $session->remove('temp_card');
+
+        $this->addFlash('success', 'La carte a été créée avec succès.');
         return $this->redirectToRoute('app_card_index');
     }
 }

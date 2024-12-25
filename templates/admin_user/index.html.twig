@@ -43,6 +43,9 @@
                                 <a href="{{ path('app_admin_user_edit', {'id': profil.id}) }}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                <a href="{{ path('app_admin_user_cards', {'id': profil.id}) }}" class="btn btn-sm btn-info text-white">
+                                    <i class="fas fa-id-card"></i>
+                                </a>
                                 <form method="post" action="{{ path('app_admin_user_delete', {'id': profil.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ profil.id) }}">
                                     <button class="btn btn-sm btn-danger">

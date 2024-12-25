@@ -15,6 +15,9 @@ class Card
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column]
+    private ?bool $visible = false;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $summary = null;
 
@@ -61,9 +64,25 @@ class Card
     #[ORM\JoinColumn(nullable: true)]
     private ?Club $club = null;
 
+    #[ORM\ManyToOne(targetEntity: Profil::class, inversedBy: 'cards')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Profil $signature = null;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function isVisible(): ?bool
+    {
+        return $this->visible;
+    }
+
+    public function setVisible(bool $visible): static
+    {
+        $this->visible = $visible;
+
+        return $this;
     }
 
     public function getSummary(): ?string
@@ -173,6 +192,17 @@ class Card
     public function setObtenu(?bool $obtenu): static
     {
         $this->obtenu = $obtenu;
+        return $this;
+    }
+
+    public function getSignature(): ?Profil
+    {
+        return $this->signature;
+    }
+
+    public function setSignature(?Profil $signature): static
+    {
+        $this->signature = $signature;
         return $this;
     }
 }
