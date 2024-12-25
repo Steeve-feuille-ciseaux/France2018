@@ -40,4 +40,15 @@ class PlayerRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findByNameLike(string $searchTerm)
+    {
+        return $this->createQueryBuilder('p')
+            ->where('LOWER(p.firstName) LIKE LOWER(:searchTerm)')
+            ->orWhere('LOWER(p.lastName) LIKE LOWER(:searchTerm)')
+            ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%')
+            ->orderBy('p.position', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

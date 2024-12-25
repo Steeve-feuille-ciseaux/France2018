@@ -32,9 +32,15 @@ class PlayerController extends AbstractController
     }
 
     #[Route('/', name: 'app_player_index', methods: ['GET'])]
-    public function index(PlayerRepository $playerRepository): Response
+    public function index(Request $request, PlayerRepository $playerRepository): Response
     {
-        $players = $playerRepository->findBy([], ['position' => 'ASC']);
+        $searchTerm = $request->query->get('search');
+        
+        if ($searchTerm) {
+            $players = $playerRepository->findByNameLike($searchTerm);
+        } else {
+            $players = $playerRepository->findBy([], ['position' => 'ASC']);
+        }
         
         // Ordre personnalisé des positions
         $positionOrder = [

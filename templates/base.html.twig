@@ -254,6 +254,12 @@
                                 </ul>
                             </li>
                         </ul>
+                        <form method="get" action="{{ path('app_player_index') }}" class="d-flex ms-auto me-2">
+                            <input type="text" name="search" class="form-control me-2" placeholder="Rechercher un joueur..." value="{{ app.request.query.get('search') }}" style="background-color: rgba(255,255,255,0.9);">
+                            <button type="submit" class="btn btn-outline-light">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </nav>
