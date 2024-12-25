@@ -29,6 +29,15 @@ class AdminUserController extends AbstractController
         ]);
     }
 
+    #[Route('/mon-profil', name: 'app_admin_user_my_profile', methods: ['GET'])]
+    public function myProfile(): Response
+    {
+        return $this->render('admin_user/show.html.twig', [
+            'profil' => $this->getUser(),
+            'is_own_profile' => true,
+        ]);
+    }
+
     #[Route('/new', name: 'app_admin_user_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
@@ -69,6 +78,7 @@ class AdminUserController extends AbstractController
 
         return $this->render('admin_user/show.html.twig', [
             'profil' => $profil,
+            'is_own_profile' => false,
         ]);
     }
 

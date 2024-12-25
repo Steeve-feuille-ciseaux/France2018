@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails de l'utilisateur{% endblock %}
+{% block title %}{% if is_own_profile %}Mon profil{% else %}Détails de l'utilisateur{% endif %}{% endblock %}
 
 {% block body %}
     <div class="container mt-4">
@@ -8,7 +8,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h1 class="h3 mb-0">Détails de l'utilisateur</h1>
+                        <h1 class="h3 mb-0">{% if is_own_profile %}Mon profil{% else %}Détails de l'utilisateur{% endif %}</h1>
                     </div>
                     <div class="card-body">
                         <table class="table">
@@ -34,23 +34,30 @@
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="{{ path('app_admin_user_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>
-                                Retour
-                            </a>
-                            <div>
-                                <a href="{{ path('app_admin_user_edit', {'id': profil.id}) }}" class="btn btn-primary">
-                                    <i class="fas fa-edit me-1"></i>
-                                    Modifier
+                            {% if not is_own_profile %}
+                                <a href="{{ path('app_admin_user_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Retour
                                 </a>
-                                <form method="post" action="{{ path('app_admin_user_delete', {'id': profil.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ profil.id) }}">
-                                    <button class="btn btn-danger">
-                                        <i class="fas fa-trash-alt me-1"></i>
-                                        Supprimer
-                                    </button>
-                                </form>
-                            </div>
+                                <div>
+                                    <a href="{{ path('app_admin_user_edit', {'id': profil.id}) }}" class="btn btn-primary">
+                                        <i class="fas fa-edit me-1"></i>
+                                        Modifier
+                                    </a>
+                                    <form method="post" action="{{ path('app_admin_user_delete', {'id': profil.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ profil.id) }}">
+                                        <button class="btn btn-danger">
+                                            <i class="fas fa-trash-alt me-1"></i>
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <a href="{{ path('app_home') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Retour
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
