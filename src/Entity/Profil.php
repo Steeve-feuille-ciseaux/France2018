@@ -25,12 +25,12 @@ class Profil implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     #[Assert\Range(min: 1, max: 4)]
-    private int $role = 1;
+    private ?int $role = null;
 
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\OneToMany(mappedBy: 'signature', targetEntity: Card::class)]
+    #[ORM\OneToMany(mappedBy: 'profil', targetEntity: Card::class)]
     private Collection $signatures;
 
     #[ORM\OneToMany(mappedBy: 'profil', targetEntity: Card::class)]
@@ -58,12 +58,12 @@ class Profil implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRole(): int
+    public function getRole(): ?int
     {
         return $this->role;
     }
 
-    public function setRole(int $role): static
+    public function setRole(?int $role): static
     {
         $this->role = $role;
         return $this;
@@ -106,7 +106,7 @@ class Profil implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->signatures->contains($signature)) {
             $this->signatures->add($signature);
-            $signature->setSignature($this);
+            $signature->setProfil($this);
         }
         return $this;
     }
@@ -114,8 +114,8 @@ class Profil implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeSignature(Card $signature): static
     {
         if ($this->signatures->removeElement($signature)) {
-            if ($signature->getSignature() === $this) {
-                $signature->setSignature(null);
+            if ($signature->getProfil() === $this) {
+                $signature->setProfil(null);
             }
         }
         return $this;

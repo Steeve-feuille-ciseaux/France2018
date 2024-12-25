@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/admin/users')]
 #[IsGranted('ROLE_USER')]
@@ -137,7 +139,7 @@ class AdminUserController extends AbstractController
         }
 
         $cards = $cardRepository->findBy([
-            'signature' => $profil,
+            'profil' => $profil,
             'visible' => false
         ]);
 
@@ -148,23 +150,26 @@ class AdminUserController extends AbstractController
     }
 
     #[Route('/card/{id}/validate', name: 'app_admin_user_validate_card', methods: ['GET', 'POST'])]
-    public function validateCard(Card $card, Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function validateCard(
+        Card $card,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SluggerInterface $slugger
+    ): Response {
         if ($this->getUser()->getRole() !== 4) {
             throw $this->createAccessDeniedException('Accès refusé');
         }
 
-        if ($request->isMethod('POST')) {
-            $card->setVisible(true);
-            $entityManager->flush();
+        $card->setVisible(true);
+        $entityManager->flush();
 
-            $this->addFlash('success', 'La carte a été validée avec succès.');
-            return $this->redirectToRoute('app_admin_user_cards', ['id' => $card->getSignature()->getId()]);
-        }
+        $this->addFlash('success', 'La carte a été validée avec succès.');
+        return $this->redirectToRoute('app_admin_user_cards', ['id' => $card->getProfil()->getId()]);
 
-        return $this->render('admin_user/validate_card.html.twig', [
-            'card' => $card,
-        ]);
+        // Template gardé pour une utilisation future si nécessaire
+        // return $this->render('admin_user/validate_card.html.twig', [
+        //     'card' => $card,
+        // ]);
     }
 
     #[Route('/cards/non-valides', name: 'app_admin_user_non_valid_cards', methods: ['GET'])]

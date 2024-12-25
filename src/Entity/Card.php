@@ -15,8 +15,8 @@ class Card
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?bool $visible = false;
+    #[ORM\Column(options: ["default" => false])]
+    private bool $visible = false;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $summary = null;
@@ -66,7 +66,7 @@ class Card
 
     #[ORM\ManyToOne(targetEntity: Profil::class, inversedBy: 'cards')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Profil $signature = null;
+    private ?Profil $profil = null;
 
     public function getId(): ?int
     {
@@ -195,14 +195,14 @@ class Card
         return $this;
     }
 
-    public function getSignature(): ?Profil
+    public function getProfil(): ?Profil
     {
-        return $this->signature;
+        return $this->profil;
     }
 
-    public function setSignature(?Profil $signature): static
+    public function setProfil(?Profil $profil): static
     {
-        $this->signature = $signature;
+        $this->profil = $profil;
         return $this;
     }
 }

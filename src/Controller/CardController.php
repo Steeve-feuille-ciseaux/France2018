@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Card;
+use App\Entity\Profil;
 use App\Form\CardType;
 use App\Repository\CardRepository;
 use App\Repository\PlayerRepository;
@@ -35,31 +36,20 @@ class CardController extends AbstractController
         SessionInterface $session,
         PlayerRepository $playerRepository,
         ClubRepository $clubRepository,
-        ProfilRepository $profilRepository
+        ProfilRepository $profilRepository,
+        SluggerInterface $slugger
     ): Response {
         $card = new Card();
         $user = $this->getUser();
-        $profil = $profilRepository->find($user->getId());
-        $card->setSignature($profil);
+        $profil = $entityManager->getReference(Profil::class, $user->getId());
+        $card->setProfil($profil);
         $card->setVisible(false);
-        
-        // Récupérer les données de session si on revient de la vérification
-        $tempData = $session->get('temp_card');
-        if ($tempData) {
-            $card = $tempData['card'];
-            if ($card->getPlayer()) {
-                $card->setPlayer($playerRepository->find($card->getPlayer()->getId()));
-            }
-            if ($card->getClub()) {
-                $card->setClub($clubRepository->find($card->getClub()->getId()));
-            }
-            $session->remove('temp_card');
-        }
         
         $form = $this->createForm(CardType::class, $card);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $imageFile */
             $imageFile = $form->get('image')->getData();
 
             if ($imageFile) {
@@ -72,55 +62,21 @@ class CardController extends AbstractController
                         $this->getParameter('cards_directory'),
                         $newFilename
                     );
+                    $card->setImageFilename($newFilename);
                 } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image');
-                    return $this->redirectToRoute('app_card_new');
+                    // ... handle exception if something happens during file upload
                 }
-
-                $card->setImageFilename($newFilename);
             }
 
-            // Recharger les entités
-            if ($card->getPlayer()) {
-                $card->setPlayer($playerRepository->find($card->getPlayer()->getId()));
-            }
-            if ($card->getClub()) {
-                $card->setClub($clubRepository->find($card->getClub()->getId()));
-            }
+            $entityManager->persist($card);
+            $entityManager->flush();
 
-            // Stocker dans la session
-            $session->set('temp_card', [
-                'card' => $card,
-                'is_new' => true
-            ]);
-
-            return $this->redirectToRoute('app_card_check');
+            return $this->redirectToRoute('app_card_index');
         }
 
         return $this->render('card/new.html.twig', [
             'card' => $card,
-            'form' => $form
-        ]);
-    }
-
-    #[Route('/check', name: 'app_card_check', methods: ['GET'])]
-    public function check(SessionInterface $session, PlayerRepository $playerRepository): Response
-    {
-        $tempCard = $session->get('temp_card');
-        
-        if (!$tempCard) {
-            return $this->redirectToRoute('app_card_index');
-        }
-
-        // Recharger l'entité Player depuis la base de données
-        $card = $tempCard['card'];
-        if ($card->getPlayer()) {
-            $card->setPlayer($playerRepository->find($card->getPlayer()->getId()));
-        }
-
-        return $this->render('card/check.html.twig', [
-            'card' => $card,
-            'is_new' => $tempCard['is_new'] ?? false
+            'form' => $form,
         ]);
     }
 
@@ -295,39 +251,6 @@ class CardController extends AbstractController
             $this->addFlash('success', 'La carte a été supprimée avec succès.');
         }
 
-        return $this->redirectToRoute('app_card_index');
-    }
-
-    #[Route('/new/confirm', name: 'app_card_new_confirm', methods: ['GET', 'POST'])]
-    public function newConfirm(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        SessionInterface $session,
-        SluggerInterface $slugger,
-        ProfilRepository $profilRepository
-    ): Response {
-        $tempData = $session->get('temp_card');
-        if (!$tempData) {
-            return $this->redirectToRoute('app_card_new');
-        }
-
-        $card = new Card();
-        $user = $this->getUser();
-        $profil = $profilRepository->find($user->getId());
-        $card->setSignature($profil);
-        $card->setPlayer($tempData['player']);
-        $card->setClub($tempData['club']);
-        $card->setNumber($tempData['number']);
-        $card->setPosition($tempData['position']);
-        $card->setStartSeason($tempData['startSeason']);
-        $card->setEndSeason($tempData['endSeason']);
-
-        $entityManager->persist($card);
-        $entityManager->flush();
-
-        $session->remove('temp_card');
-
-        $this->addFlash('success', 'La carte a été créée avec succès.');
         return $this->redirectToRoute('app_card_index');
     }
 }

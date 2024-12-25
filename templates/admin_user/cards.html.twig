@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Cartes à valider pour {{ profil.pseudo }}{% endblock %}
+{% block title %}Cartes non validées{% endblock %}
 
 {% block body %}
     <div class="container mt-4">
-        <h1>Cartes à valider pour {{ profil.pseudo }}</h1>
+        <h1>Cartes non validées pour {{ profil.pseudo }}</h1>
 
         {% for message in app.flashes('success') %}
             <div class="alert alert-success">
@@ -12,43 +12,37 @@
             </div>
         {% endfor %}
 
-        {% if cards|length > 0 %}
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Joueur</th>
-                            <th>Club</th>
-                            <th>Numéro</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for card in cards %}
-                            <tr>
-                                <td>{{ card.player.firstName }} {{ card.player.lastName }}</td>
-                                <td>{{ card.club.nom }}</td>
-                                <td>{{ card.number }}</td>
-                                <td>
-                                    <a href="{{ path('app_admin_user_validate_card', {'id': card.id}) }}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-check me-1"></i>
-                                        Valider
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="alert alert-info">
-                Aucune carte en attente de validation.
-            </div>
-        {% endif %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Joueur</th>
+                    <th>Club</th>
+                    <th>Numéro</th>
+                    <th>Position</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for card in cards %}
+                <tr>
+                    <td>{{ card.player.firstName }} {{ card.player.lastName }}</td>
+                    <td>{{ card.club ? card.club.nom : '' }}</td>
+                    <td>{{ card.number }}</td>
+                    <td>{{ card.position }}</td>
+                    <td>
+                        <a href="{{ path('app_admin_user_validate_card', {'id': card.id}) }}" class="btn btn-success btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir valider cette carte ?')">
+                            Valider
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucune carte à valider</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-        <a href="{{ path('app_admin_user_index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i>
-            Retour à la liste
-        </a>
+        <a href="{{ path('app_admin_user_index') }}" class="btn btn-secondary">Retour à la liste</a>
     </div>
 {% endblock %}
