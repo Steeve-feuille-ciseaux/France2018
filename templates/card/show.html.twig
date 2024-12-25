@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Carte de {{ card.player.firstName }} {{ card.player.lastName }}{% endblock %}
+{% block title %}Détails de la Carte{% endblock %}
 
 {% block body %}
     <div class="container mt-4">
@@ -8,139 +8,63 @@
             <div class="col-md-8 offset-md-2">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h1 class="h3 mb-0">Détails de la carte</h1>
-                        <div class="btn-group">
-                            <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-light">
-                                <i class="fas fa-edit me-2"></i>Modifier
-                            </a>
-                        </div>
+                        <h2 class="mb-0">Carte de {{ card.player.firstName }} {{ card.player.lastName }}</h2>
                     </div>
-
                     <div class="card-body">
-                        {% if card.imageFilename %}
-                            <div class="text-center mb-4">
-                                <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" 
-                                     class="img-fluid card-detail-image" 
-                                     alt="Carte de {{ card.player.firstName }} {{ card.player.lastName }}">
-                            </div>
-                        {% endif %}
-
-                        <div class="row mb-4">
+                        <div class="row">
                             <div class="col-md-6">
-                                <h5 class="text-primary">Joueur</h5>
-                                <div class="d-flex align-items-center">
-                                    {% if card.player.photoFilename %}
-                                        <img src="{{ asset('uploads/player/' ~ card.player.photoFilename) }}" 
-                                             alt="Photo de {{ card.player.firstName }} {{ card.player.lastName }}"
-                                             class="me-2 rounded"
-                                             style="max-height: 50px;">
-                                    {% endif %}
-                                    <div>
-                                        <a href="{{ path('app_player_show', {'id': card.player.id}) }}" class="text-decoration-none">
-                                            {{ card.player.firstName }} {{ card.player.lastName }}
-                                        </a><br>
-                                        <small class="text-muted">
-                                            {% if card.player.nationality.drapeau %}
-                                                <img src="{{ asset('uploads/drapeaux/' ~ card.player.nationality.drapeau) }}" 
-                                                     alt="Drapeau de {{ card.player.nationality.nom }}"
-                                                     class="me-1"
-                                                     style="max-height: 12px;">
-                                            {% endif %}
-                                            {{ card.player.nationality.nom }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Club</h5>
-                                <div class="d-flex align-items-center">
-                                    {% if card.club.blason %}
-                                        <img src="{{ asset('uploads/blasons/' ~ card.club.blason) }}" 
-                                             alt="Blason de {{ card.club.nom }}"
-                                             class="me-2"
-                                             style="max-height: 40px;">
-                                    {% endif %}
-                                    <div>
-                                        {{ card.club.nom }}<br>
-                                        <small class="text-muted">
-                                            {% if card.club.pays.drapeau %}
-                                                <img src="{{ asset('uploads/drapeaux/' ~ card.club.pays.drapeau) }}" 
-                                                     alt="Drapeau de {{ card.club.pays.nom }}"
-                                                     class="me-1"
-                                                     style="max-height: 12px;">
-                                            {% endif %}
-                                            {{ card.club.pays.nom }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Position et Numéro</h5>
-                                <p>
-                                    <strong>Position:</strong> {{ card.position }}<br>
-                                    <strong>Numéro:</strong> {{ card.number }}
-                                </p>
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Période</h5>
-                                <p>
-                                    <strong>Début:</strong> {{ card.startSeason }}<br>
-                                    {% if card.endSeason %}
-                                        <strong>Fin:</strong> {{ card.endSeason }}
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-
-                        {% if card.summary or card.notableAction %}
-                            <div class="row">
-                                {% if card.summary %}
-                                    <div class="col-12 mb-4">
-                                        <h5 class="text-primary">Résumé</h5>
-                                        <p>{{ card.summary|nl2br }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if card.notableAction %}
-                                    <div class="col-12">
-                                        <h5 class="text-primary">Action notable</h5>
-                                        <p>{{ card.notableAction|nl2br }}</p>
-                                    </div>
+                                {% if card.imageFilename %}
+                                    <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" class="img-fluid rounded mb-3" alt="Photo du joueur">
                                 {% endif %}
                             </div>
-                        {% endif %}
+                            <div class="col-md-6">
+                                <h4 class="text-primary">Informations</h4>
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th>Club</th>
+                                            <td>{{ card.club ? card.club.nom : 'Non spécifié' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Numéro</th>
+                                            <td>{{ card.number }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Position</th>
+                                            <td>{{ card.position }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Statut</th>
+                                            <td>
+                                                {% if card.visible %}
+                                                    <span class="badge bg-success">Validée</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">En attente de validation</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-
                     <div class="card-footer">
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ path('app_card_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                        <div class="btn-group">
+                            <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
                             </a>
-                            <form method="post" action="{{ path('app_card_delete', {'id': card.id}) }}" 
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette carte ?');"
-                                  style="display: inline-block;">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ card.id) }}">
-                                <button class="btn btn-danger">
-                                    <i class="fas fa-trash-alt me-2"></i>Supprimer
-                                </button>
-                            </form>
+                            {% if is_granted('ROLE_ADMIN') and not card.visible %}
+                                <a href="{{ path('app_admin_user_validate_card', {'id': card.id}) }}" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Valider
+                                </a>
+                            {% endif %}
+                            <a href="{{ app.request.headers.get('referer')|default(path('app_card_index')) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .card-detail-image {
-            max-height: 400px;
-            width: auto;
-            object-fit: contain;
-        }
-    </style>
 {% endblock %}
