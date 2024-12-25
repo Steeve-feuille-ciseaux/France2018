@@ -20,26 +20,37 @@
                         <h5 class="card-title mb-0">Informations de la carte</h5>
                     </div>
                     <div class="card-body">
-                        {# Sélection du joueur #}
-                        <div class="mb-4">
-                            <h6 class="text-primary mb-3">Joueur associé</h6>
-                            {{ form_row(form.player, {
-                                'attr': {
-                                    'class': 'form-select'
-                                }
-                            }) }}
-                        </div>
-
-                        {# Informations principales #}
-                        <div class="row mb-4">
-                            <h6 class="text-primary mb-3">Informations principales</h6>
+                        <div class="row">
                             <div class="col-md-6">
-                                {{ form_row(form.number) }}
-                                {{ form_row(form.position) }}
+                                <div class="form-group">
+                                    {{ form_label(form.player, 'Joueur') }}
+                                    {{ form_widget(form.player, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.player) }}
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                {{ form_row(form.startSeason) }}
-                                {{ form_row(form.endSeason) }}
+                                <div class="form-group">
+                                    {{ form_label(form.club, 'Club') }}
+                                    {{ form_widget(form.club, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.club) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.number, 'Numéro') }}
+                                    {{ form_widget(form.number, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.number) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.position, 'Position') }}
+                                    {{ form_widget(form.position, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.position) }}
+                                </div>
                             </div>
                         </div>
 
