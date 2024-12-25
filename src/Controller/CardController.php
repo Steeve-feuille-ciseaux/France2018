@@ -71,6 +71,7 @@ class CardController extends AbstractController
             $entityManager->persist($card);
             $entityManager->flush();
 
+            $this->addFlash('info', 'Votre carte a été créée avec succès. Elle sera visible publiquement après validation par un modérateur.');
             return $this->redirectToRoute('app_card_index');
         }
 

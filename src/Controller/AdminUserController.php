@@ -165,11 +165,6 @@ class AdminUserController extends AbstractController
 
         $this->addFlash('success', 'La carte a été validée avec succès.');
         return $this->redirectToRoute('app_admin_user_cards', ['id' => $card->getProfil()->getId()]);
-
-        // Template gardé pour une utilisation future si nécessaire
-        // return $this->render('admin_user/validate_card.html.twig', [
-        //     'card' => $card,
-        // ]);
     }
 
     #[Route('/cards/non-valides', name: 'app_admin_user_non_valid_cards', methods: ['GET'])]
