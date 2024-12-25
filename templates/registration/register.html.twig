@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="h3 mb-0">Créer un compte</h1>
+                </div>
+                <div class="card-body">
+                    {{ form_start(registrationForm) }}
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.pseudo, 'Pseudo') }}
+                            {{ form_widget(registrationForm.pseudo) }}
+                            {{ form_errors(registrationForm.pseudo) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.password, 'Mot de passe') }}
+                            {{ form_widget(registrationForm.password) }}
+                            {{ form_errors(registrationForm.password) }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">S'inscrire</button>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

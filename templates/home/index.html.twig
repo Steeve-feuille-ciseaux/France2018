@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Bienvenue {% if user %}{{ user.pseudo }}{% else %}visiteur{% endif %}</h1>
+        <p class="lead">Découvrez notre site dédié au football</p>
+    </div>
+</div>
+{% endblock %}
