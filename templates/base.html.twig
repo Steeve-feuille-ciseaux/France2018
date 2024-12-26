@@ -258,6 +258,13 @@
                                                 Nouvelle carte
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('app_admin_user_non_valid_cards') }}">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Cartes en attente
+                                                {% set pendingCards = app.user.role >= 2 ? pending_cards_count|default(0) : 0 %}
+                                            </a>
+                                        </li>
                                     {% endif %}
                                 </ul>
                             </li>

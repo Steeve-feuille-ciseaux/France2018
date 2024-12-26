@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Profil;
 use App\Entity\Card;
+use App\Entity\Profil;
 use App\Form\AdminUserType;
-use App\Repository\ProfilRepository;
 use App\Repository\CardRepository;
+use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +18,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/admin/users')]
 #[IsGranted('ROLE_USER')]
-class AdminUserController extends AbstractController
+class AdminUserController extends BaseController
 {
     #[Route('/', name: 'app_admin_user_index', methods: ['GET'])]
     public function index(ProfilRepository $profilRepository): Response
@@ -157,7 +157,7 @@ class AdminUserController extends AbstractController
         SluggerInterface $slugger
     ): Response {
         if ($this->getUser()->getRole() !== 4) {
-            throw $this->createAccessDeniedException('Accès refusé');
+            throw $this->createAccessDeniedException('Seuls les super administrateurs peuvent valider les cartes.');
         }
 
         $card->setVisible(true);
@@ -170,16 +170,24 @@ class AdminUserController extends AbstractController
     #[Route('/cards/non-valides', name: 'app_admin_user_non_valid_cards', methods: ['GET'])]
     public function nonValidCards(CardRepository $cardRepository): Response
     {
-        if ($this->getUser()->getRole() !== 4) {
+        if ($this->getUser()->getRole() < 2) {
             throw $this->createAccessDeniedException('Accès refusé');
         }
 
-        $cards = $cardRepository->findBy([
-            'visible' => false
-        ]);
+        // Pour les rôles 2 et 3, ne montrer que leurs propres cartes
+        if ($this->getUser()->getRole() < 4) {
+            $cards = $cardRepository->findBy([
+                'visible' => false,
+                'profil' => $this->getUser()
+            ], ['id' => 'DESC']);
+        } else {
+            // Pour le rôle 4, montrer toutes les cartes
+            $cards = $cardRepository->findBy(['visible' => false], ['id' => 'DESC']);
+        }
 
         return $this->render('admin_user/non_valid_cards.html.twig', [
             'cards' => $cards,
+            'pending_cards_count' => $this->getPendingCardsCount()
         ]);
     }
 

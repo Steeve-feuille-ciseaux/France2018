@@ -6,26 +6,25 @@ use App\Entity\Card;
 use App\Entity\Profil;
 use App\Form\CardType;
 use App\Repository\CardRepository;
-use App\Repository\PlayerRepository;
 use App\Repository\ClubRepository;
+use App\Repository\PlayerRepository;
 use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/card')]
-class CardController extends AbstractController
+class CardController extends BaseController
 {
     #[Route('/', name: 'app_card_index', methods: ['GET'])]
     public function index(CardRepository $cardRepository): Response
     {
         return $this->render('card/index.html.twig', [
             'cards' => $cardRepository->findBy(['visible' => true]),
+            'pending_cards_count' => $this->getPendingCardsCount()
         ]);
     }
 
@@ -34,7 +33,7 @@ class CardController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         SessionInterface $session,
-        PlayerRepository $playerRepository,
+        CardRepository $cardRepository,
         ClubRepository $clubRepository,
         ProfilRepository $profilRepository,
         SluggerInterface $slugger
@@ -78,6 +77,7 @@ class CardController extends AbstractController
         return $this->render('card/new.html.twig', [
             'card' => $card,
             'form' => $form,
+            'pending_cards_count' => $this->getPendingCardsCount()
         ]);
     }
 
@@ -176,53 +176,25 @@ class CardController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_card_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Card $card, EntityManagerInterface $entityManager, SluggerInterface $slugger, SessionInterface $session, PlayerRepository $playerRepository): Response
+    public function edit(Request $request, Card $card, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(CardType::class, $card);
-        
-        // Si on revient de la page de vérification
-        $tempCard = $session->get('temp_card');
-        if ($tempCard && $tempCard['card']->getId() === $card->getId()) {
-            // Recharger l'entité Player depuis la base de données
-            $tempCard['card']->setPlayer($playerRepository->find($tempCard['card']->getPlayer()->getId()));
-            $form = $this->createForm(CardType::class, $tempCard['card']);
+        // Vérifier si l'utilisateur a le droit de modifier cette carte
+        if ($this->getUser()->getRole() < 4 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas le droit de modifier cette carte.');
         }
-        
+
+        $form = $this->createForm(CardType::class, $card);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('image')->getData();
-
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-                try {
-                    $imageFile->move(
-                        $this->getParameter('cards_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... gérer l'exception
-                }
-
-                $card->setImageFilename($newFilename);
-            }
-
-            // Stocke dans la session pour la vérification
-            $session->set('temp_card', [
-                'card' => $card,
-                'image_path' => $imageFile ? $this->getParameter('cards_directory').'/'.$newFilename : null,
-                'is_new' => false // Important : marquer comme modification
-            ]);
-
-            return $this->redirectToRoute('app_card_check');
+            $entityManager->flush();
+            return $this->redirectToRoute('app_card_index');
         }
 
         return $this->render('card/edit.html.twig', [
             'card' => $card,
             'form' => $form,
+            'pending_cards_count' => $this->getPendingCardsCount()
         ]);
     }
 
@@ -231,12 +203,18 @@ class CardController extends AbstractController
     {
         return $this->render('card/show.html.twig', [
             'card' => $card,
+            'pending_cards_count' => $this->getPendingCardsCount()
         ]);
     }
 
     #[Route('/{id}/delete', name: 'app_card_delete', methods: ['POST'])]
     public function delete(Request $request, Card $card, EntityManagerInterface $entityManager): Response
     {
+        // Vérifier si l'utilisateur a le droit de supprimer cette carte
+        if ($this->getUser()->getRole() < 4 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas le droit de supprimer cette carte.');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$card->getId(), $request->request->get('_token'))) {
             // Supprime l'image si elle existe
             if ($card->getImageFilename()) {
@@ -253,5 +231,10 @@ class CardController extends AbstractController
         }
 
         return $this->redirectToRoute('app_card_index');
+    }
+
+    public function getPendingCardsCount(): int
+    {
+        return parent::getPendingCardsCount();
     }
 }
