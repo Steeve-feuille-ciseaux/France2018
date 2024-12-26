@@ -179,7 +179,7 @@ class CardController extends BaseController
     public function edit(Request $request, Card $card, EntityManagerInterface $entityManager): Response
     {
         // Vérifier si l'utilisateur a le droit de modifier cette carte
-        if ($this->getUser()->getRole() < 4 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
+        if ($this->getUser()->getRole() < 3 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas le droit de modifier cette carte.');
         }
 
@@ -211,7 +211,7 @@ class CardController extends BaseController
     public function delete(Request $request, Card $card, EntityManagerInterface $entityManager): Response
     {
         // Vérifier si l'utilisateur a le droit de supprimer cette carte
-        if ($this->getUser()->getRole() < 4 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
+        if ($this->getUser()->getRole() < 3 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas le droit de supprimer cette carte.');
         }
 

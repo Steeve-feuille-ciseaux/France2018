@@ -156,8 +156,8 @@ class AdminUserController extends BaseController
         EntityManagerInterface $entityManager,
         SluggerInterface $slugger
     ): Response {
-        if ($this->getUser()->getRole() !== 4) {
-            throw $this->createAccessDeniedException('Seuls les super administrateurs peuvent valider les cartes.');
+        if ($this->getUser()->getRole() < 3) {
+            throw $this->createAccessDeniedException('Seuls les administrateurs peuvent valider les cartes.');
         }
 
         $card->setVisible(true);
@@ -174,14 +174,14 @@ class AdminUserController extends BaseController
             throw $this->createAccessDeniedException('Accès refusé');
         }
 
-        // Pour les rôles 2 et 3, ne montrer que leurs propres cartes
-        if ($this->getUser()->getRole() < 4) {
+        // Pour le rôle 2, ne montrer que leurs propres cartes
+        if ($this->getUser()->getRole() == 2) {
             $cards = $cardRepository->findBy([
                 'visible' => false,
                 'profil' => $this->getUser()
             ], ['id' => 'DESC']);
         } else {
-            // Pour le rôle 4, montrer toutes les cartes
+            // Pour les rôles 3 et 4, montrer toutes les cartes
             $cards = $cardRepository->findBy(['visible' => false], ['id' => 'DESC']);
         }
 
@@ -194,7 +194,7 @@ class AdminUserController extends BaseController
     #[Route('/card/{id}/refuse', name: 'app_admin_user_refuse_card', methods: ['GET', 'POST'])]
     public function refuseCard(Card $card, Request $request, EntityManagerInterface $entityManager): Response
     {
-        if ($this->getUser()->getRole() !== 4) {
+        if ($this->getUser()->getRole() < 3) {
             throw $this->createAccessDeniedException('Accès refusé');
         }
 
