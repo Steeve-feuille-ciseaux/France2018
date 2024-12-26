@@ -27,7 +27,9 @@
                     <td>{{ club.pays ? club.pays.nom : '' }}</td>
                     <td>
                         <a href="{{ path('app_club_show', {'id': club.id}) }}" class="btn btn-sm btn-info">Voir</a>
-                        <a href="{{ path('app_club_edit', {'id': club.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                        {% if app.user %}
+                            <a href="{{ path('app_club_edit', {'id': club.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                        {% endif %}
                     </td>
                 </tr>
             {% else %}
@@ -38,6 +40,8 @@
             </tbody>
         </table>
 
-        <a href="{{ path('app_club_new') }}" class="btn btn-primary">Créer un nouveau club</a>
+        {% if app.user %}
+            <a href="{{ path('app_club_new') }}" class="btn btn-primary">Créer un nouveau club</a>
+        {% endif %}
     </div>
 {% endblock %}

@@ -6,9 +6,11 @@
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Liste des joueurs</h1>
-            <a href="{{ path('app_player_new') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Nouveau joueur
-            </a>
+            {% if app.user %}
+                <a href="{{ path('app_player_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Nouveau joueur
+                </a>
+            {% endif %}
         </div>
 
         <div class="row">
@@ -42,9 +44,11 @@
                                             <a href="{{ path('app_player_show', {'id': player.id}) }}" class="btn btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ path('app_player_edit', {'id': player.id}) }}" class="btn btn-warning">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                            {% if app.user %}
+                                                <a href="{{ path('app_player_edit', {'id': player.id}) }}" class="btn btn-warning">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

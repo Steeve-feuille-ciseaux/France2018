@@ -50,9 +50,11 @@
                     </div>
                     <div class="card-footer">
                         <div class="btn-group">
-                            <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Modifier
-                            </a>
+                            {% if app.user %}
+                                <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                            {% endif %}
                             {% if is_granted('ROLE_ADMIN') and not card.visible %}
                                 <a href="{{ path('app_admin_user_validate_card', {'id': card.id}) }}" class="btn btn-success">
                                     <i class="fas fa-check"></i> Valider

@@ -1,0 +1,7 @@
+{% macro canEdit() %}
+    {% if app.user and app.user.role >= 2 %}
+        {{ true }}
+    {% else %}
+        {{ false }}
+    {% endif %}
+{% endmacro %}
