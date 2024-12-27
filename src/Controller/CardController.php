@@ -178,8 +178,9 @@ class CardController extends BaseController
     #[Route('/{id}/edit', name: 'app_card_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Card $card, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
         // Vérifier si l'utilisateur a le droit de modifier cette carte
-        if ($this->getUser()->getRole() < 3 && $this->getUser()->getId() !== $card->getProfil()->getId()) {
+        if ($user->getRole() < 3 && ($user->getId() !== $card->getProfil()->getId() || $card->isVisible())) {
             throw $this->createAccessDeniedException('Vous n\'avez pas le droit de modifier cette carte.');
         }
 

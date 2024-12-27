@@ -1,0 +1,292 @@
+{% macro canEdit(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canDelete(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canUpdate(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+```
+
+Note: Il semble que les instructions et le code édité fournis soient identiques au code d'origine. Si vous souhaitez autoriser les rôles 3 et 4 à modifier toutes les cartes, vous devriez modifier les conditions dans les macros pour inclure le rôle 4. Voici un exemple de la mise à jour :
+
+```
+{% macro canEdit(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canDelete(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canUpdate(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+```
+
+Devrait être mis à jour en :
+
+```
+{% macro canEdit(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canDelete(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canUpdate(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+```
+
+Devrait être mis à jour en :
+
+```
+{% macro canEdit(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canDelete(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canUpdate(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+```
+
+Devrait être mis à jour en :
+
+```
+{% macro canEdit(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canDelete(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canUpdate(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+```
+
+Devrait être mis à jour en :
+
+```
+{% macro canEdit(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canDelete(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+
+{% macro canUpdate(creator = null, isValidated = true) %}
+    {% if app.user %}
+        {% if app.user.role >= 3 %}
+            {% set result = true %}
+        {% elseif app.user.role == 2 and creator is not null %}
+            {% set result = app.user.id == creator.id and not isValidated %}
+        {% else %}
+            {% set result = false %}
+        {% endif %}
+    {% else %}
+        {% set result = false %}
+    {% endif %}
+    {{ result }}
+{% endmacro %}
+```
+
+Devrait être mis à jour en :

@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+{% import "includes/_role_checker.html.twig" as role_checker %}
+
+{% block title %}Cartes non validées{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <h1>Cartes non validées</h1>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for card in cards %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if card.imageFilename %}
+                            <img src="{{ asset('uploads/cards/' ~ card.imageFilename) }}" 
+                                 class="card-img-top" 
+                                 alt="Carte de {{ card.player.firstName }} {{ card.player.lastName }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ card.player.firstName }} {{ card.player.lastName }}</h5>
+                            <p class="card-text">
+                                <strong>Position:</strong> {{ card.position }}<br>
+                                <strong>Numéro:</strong> {{ card.number }}<br>
+                                <strong>Saison:</strong> {{ card.startSeason }}{% if card.endSeason %} - {{ card.endSeason }}{% endif %}<br>
+                                <strong>Créé par:</strong> {{ card.profil.pseudo }}
+                            </p>
+                            <div class="text-center">
+                                <a href="{{ path('app_card_show', {'id': card.id}) }}" class="btn btn-sm btn-info me-2">
+                                    <i class="fas fa-eye me-1"></i>Voir
+                                </a>
+                                {% if app.user.role >= 3 or role_checker.canEdit(card.profil, card.visible) %}
+                                    <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn btn-sm btn-warning me-2">
+                                        <i class="fas fa-edit me-1"></i>Modifier
+                                    </a>
+                                {% endif %}
+                                {% if app.user.role >= 3 %}
+                                    <form action="{{ path('admin_validate_card', {'id': card.id}) }}" method="post" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ card.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check me-1"></i>Valider
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Aucune carte en attente de validation.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
