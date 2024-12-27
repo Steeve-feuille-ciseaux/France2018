@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class AdminUserType extends AbstractType
 {
@@ -19,7 +20,14 @@ class AdminUserType extends AbstractType
                 'attr' => ['class' => 'form-control']
             ])
             ->add('password', PasswordType::class, [
-                'attr' => ['class' => 'form-control']
+                'attr' => ['class' => 'form-control'],
+                'required' => $options['require_password'],
+                'mapped' => false,
+                'constraints' => $options['require_password'] ? [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer un mot de passe',
+                    ]),
+                ] : [],
             ])
             ->add('role', ChoiceType::class, [
                 'choices' => [
@@ -37,6 +45,7 @@ class AdminUserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Profil::class,
+            'require_password' => false,
         ]);
     }
 }

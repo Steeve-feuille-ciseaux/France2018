@@ -49,7 +49,9 @@ class AdminUserController extends BaseController
         }
 
         $profil = new Profil();
-        $form = $this->createForm(AdminUserType::class, $profil);
+        $form = $this->createForm(AdminUserType::class, $profil, [
+            'require_password' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -92,15 +94,17 @@ class AdminUserController extends BaseController
             throw $this->createAccessDeniedException('Accès refusé');
         }
 
-        $form = $this->createForm(AdminUserType::class, $profil);
+        $form = $this->createForm(AdminUserType::class, $profil, [
+            'require_password' => false,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('password')->getData()) {
+            if ($password = $form->get('password')->getData()) {
                 $profil->setPassword(
                     $passwordHasher->hashPassword(
                         $profil,
-                        $form->get('password')->getData()
+                        $password
                     )
                 );
             }
