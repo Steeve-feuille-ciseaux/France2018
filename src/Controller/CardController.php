@@ -10,6 +10,8 @@ use App\Repository\ClubRepository;
 use App\Repository\PlayerRepository;
 use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -176,8 +178,12 @@ class CardController extends BaseController
     }
 
     #[Route('/{id}/edit', name: 'app_card_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Card $card, EntityManagerInterface $entityManager): Response
-    {
+    public function edit(
+        Request $request, 
+        Card $card, 
+        EntityManagerInterface $entityManager,
+        SluggerInterface $slugger
+    ): Response {
         $user = $this->getUser();
         // Vérifier si l'utilisateur a le droit de modifier cette carte
         if ($user->getRole() < 3 && ($user->getId() !== $card->getProfil()->getId() || $card->isVisible())) {
@@ -188,7 +194,36 @@ class CardController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                try {
+                    // Supprimer l'ancienne image si elle existe
+                    if ($card->getImageFilename()) {
+                        $oldImagePath = $this->getParameter('cards_directory').'/'.$card->getImageFilename();
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
+                    }
+
+                    // Déplacer la nouvelle image
+                    $imageFile->move(
+                        $this->getParameter('cards_directory'),
+                        $newFilename
+                    );
+                    $card->setImageFilename($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+                }
+            }
+
             $entityManager->flush();
+            $this->addFlash('success', 'La carte a été modifiée avec succès.');
             return $this->redirectToRoute('app_card_index');
         }
 
